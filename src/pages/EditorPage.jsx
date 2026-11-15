@@ -231,6 +231,11 @@ export default function EditorPage() {
         </Link>
         <div className={styles.titleRow}>
           <h1>{isNew ? 'New post' : 'Edit post'}</h1>
+          {!isNew && (
+            <Link to="/posts/new" className={styles.newBtn}>
+              New post
+            </Link>
+          )}
           {wpEditUrl && (
             <a href={wpEditUrl} target="_blank" rel="noopener noreferrer" className={styles.wpLink}>
               Open in WordPress
