@@ -96,9 +96,12 @@ export function AuthProvider({ children }) {
     configureClient({ auth: null, site: '', mode: 'mock' });
   }, []);
 
+  const clearLoginNotice = useCallback(() => setLoginNotice(null), []);
+
   const value = {
     session,
     loginNotice,
+    clearLoginNotice,
     isAuthenticated: !!session,
     login,
     logout,

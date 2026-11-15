@@ -7,13 +7,25 @@ const CheckIcon = () => (
   </svg>
 );
 
-export default function Banner({ message, kind = 'error', children }) {
+export default function Banner({ message, kind = 'error', children, onDismiss }) {
   if (!message && !children) return null;
 
   return (
     <div className={`${styles.banner} ${styles[kind]}`} role="alert">
       {kind === 'ok' && <CheckIcon />}
-      <span>{message || children}</span>
+      <span className={styles.text}>{message || children}</span>
+      {onDismiss && (
+        <button
+          type="button"
+          className={styles.dismiss}
+          onClick={onDismiss}
+          aria-label="Dismiss"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+        </button>
+      )}
     </div>
   );
 }

@@ -35,6 +35,26 @@
   border-color: color-mix(in srgb, var(--accent) 25%, transparent);
 }
 
+.text {
+  flex: 1;
+}
+
+.dismiss {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 1px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.dismiss:hover {
+  opacity: 1;
+}
+
 @keyframes bannerIn {
   from {
     opacity: 0;

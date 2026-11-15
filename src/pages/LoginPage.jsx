@@ -12,7 +12,7 @@ const mockEnabled = import.meta.env.VITE_MOCK_ENABLED === 'true';
 const envSiteUrl = import.meta.env.VITE_WP_SITE_URL || '';
 
 export default function LoginPage() {
-  const { login, loginNotice } = useAuth();
+  const { login, loginNotice, clearLoginNotice } = useAuth();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState(mockEnabled ? 'mock' : 'live');
@@ -84,7 +84,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {loginNotice && <Banner kind="warning" message={loginNotice} />}
+        {loginNotice && <Banner kind="warning" message={loginNotice} onDismiss={clearLoginNotice} />}
 
         <div className={styles.card}>
           {showModeToggle && (
@@ -199,7 +199,7 @@ export default function LoginPage() {
             <FieldError id="f-password-error" message={errors.password} />
           </div>
 
-          {apiError && <Banner message={apiError} />}
+          {apiError && <Banner message={apiError} onDismiss={() => setApiError('')} />}
 
           <button
             type="button"
