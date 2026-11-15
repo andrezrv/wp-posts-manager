@@ -9,7 +9,7 @@ const AuthContext = createContext(null);
 
 function saveSession(session) {
   try {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   } catch (_) {
     /* storage full or blocked */
   }
@@ -17,7 +17,7 @@ function saveSession(session) {
 
 function loadSession() {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (_) {
     return null;
@@ -26,7 +26,7 @@ function loadSession() {
 
 function clearSession() {
   try {
-    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
   } catch (_) {
     /* blocked */
   }
@@ -53,6 +53,20 @@ export function AuthProvider({ children }) {
     if (session) {
       configureClient({ auth: session.auth, site: session.siteUrl, mode: session.mode });
     }
+
+    const onStorage = (e) => {
+      if (e.key !== SESSION_KEY) return;
+      const next = e.newValue ? JSON.parse(e.newValue) : null;
+      sessionRef.current = next;
+      setSession(next);
+      if (next) {
+        configureClient({ auth: next.auth, site: next.siteUrl, mode: next.mode });
+      } else {
+        configureClient({ auth: null, site: '', mode: 'mock' });
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
 
   const login = useCallback(async (mode, siteUrl, username, password) => {
