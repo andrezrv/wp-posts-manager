@@ -1,9 +1,11 @@
+import { lazy, Suspense } from 'react';
 import { createHashRouter, Navigate } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
 import ProtectedRoute from './auth/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import PostsPage from './pages/PostsPage';
-import EditorPage from './pages/EditorPage';
+
+const EditorPage = lazy(() => import('./pages/EditorPage'));
 
 export const router = createHashRouter([
   {
@@ -22,11 +24,11 @@ export const router = createHashRouter([
           },
           {
             path: '/posts/new',
-            element: <EditorPage />,
+            element: <Suspense fallback={null}><EditorPage /></Suspense>,
           },
           {
             path: '/posts/:id/edit',
-            element: <EditorPage />,
+            element: <Suspense fallback={null}><EditorPage /></Suspense>,
           },
         ],
       },
