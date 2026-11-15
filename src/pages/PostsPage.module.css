@@ -62,14 +62,13 @@
 }
 
 .tab {
-  appearance: none;
-  border: 0;
-  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   font: 500 13.5px var(--font-body);
   color: var(--muted);
   padding: 8px 12px;
   border-radius: 6px;
-  cursor: pointer;
   white-space: nowrap;
 }
 
@@ -78,7 +77,7 @@
   background: var(--surface-2);
 }
 
-.tab[aria-pressed='true'] {
+.tab[aria-current='page'] {
   background: var(--accent-soft);
   color: var(--accent);
 }

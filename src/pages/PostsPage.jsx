@@ -83,14 +83,12 @@ export default function PostsPage() {
   const [deleteError, setDeleteError] = useState('');
   const [permanent, setPermanent] = useState(false);
 
-  const handleTabChange = (s) => {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (s === 'any') next.delete('status');
-      else next.set('status', s);
-      next.delete('page');
-      return next;
-    });
+  const tabHref = (key) => {
+    const params = new URLSearchParams();
+    if (key !== 'any') params.set('status', key);
+    if (urlSearch) params.set('q', urlSearch);
+    const qs = params.toString();
+    return `/posts${qs ? '?' + qs : ''}`;
   };
 
   const handleSearchChange = (e) => {
@@ -168,16 +166,15 @@ export default function PostsPage() {
                   : counts[key]
                 : null;
               return (
-                <button
+                <Link
                   key={key}
-                  type="button"
+                  to={tabHref(key)}
                   className={styles.tab}
-                  aria-pressed={status === key}
-                  onClick={() => handleTabChange(key)}
+                  aria-current={status === key ? 'page' : undefined}
                 >
                   {label}
                   {count != null && <span className={styles.tabCount}>{count}</span>}
-                </button>
+                </Link>
               );
             })}
           </div>
