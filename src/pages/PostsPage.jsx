@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import usePosts from '../hooks/usePosts';
 import usePostCounts from '../hooks/usePostCounts';
@@ -19,6 +19,7 @@ const STATUS_TABS = [
   ['draft', 'Drafts'],
   ['pending', 'Pending'],
   ['private', 'Private'],
+  ['trash', 'Trash'],
 ];
 
 function getThumb(post) {
@@ -43,6 +44,7 @@ function dateValue(post) {
 
 export default function PostsPage() {
   const { session } = useAuth();
+  const location = useLocation();
   const perPage = session?.postsPerPage || 10;
 
   const [status, setStatus] = useState('any');
@@ -50,7 +52,7 @@ export default function PostsPage() {
   const [page, setPage] = useState(1);
   const debouncedSearch = useDebounce(search);
 
-  const { posts, total, totalPages, loading, error, refetch, deletePost } = usePosts({
+  const { posts, total, totalPages, loading, error, refetch, deletePost, restorePost } = usePosts({
     page,
     perPage,
     search: debouncedSearch,
@@ -76,7 +78,7 @@ export default function PostsPage() {
 
   const openDelete = (post) => {
     setDeleting(post);
-    setPermanent(false);
+    setPermanent(post.status === 'trash');
     setDeleteError('');
   };
 
@@ -95,6 +97,22 @@ export default function PostsPage() {
       setDeleteBusy(false);
     }
   }, [deleting, permanent, deletePost, refetch, refetchCounts]);
+
+  const [trashWarningDismissed, setTrashWarningDismissed] = useState(false);
+  const [restoringId, setRestoringId] = useState(null);
+
+  const handleRestore = useCallback(async (post) => {
+    setRestoringId(post.id);
+    try {
+      await restorePost(post.id);
+      refetch();
+      refetchCounts();
+    } catch (_) {
+      // restore failure is visible as the post staying in the list
+    } finally {
+      setRestoringId(null);
+    }
+  }, [restorePost, refetch, refetchCounts]);
 
   const from = (page - 1) * perPage + 1;
   const to = Math.min(page * perPage, total);
@@ -115,13 +133,17 @@ export default function PostsPage() {
         </Link>
       </div>
 
+      {location.state?.trashWarning && !trashWarningDismissed && (
+        <Banner kind="warning" message="That post is in the Trash. Restore it first to edit it." onDismiss={() => setTrashWarningDismissed(true)} />
+      )}
+
       <div className={styles.card}>
         <div className={styles.toolbar}>
           <div className={styles.tabs}>
             {STATUS_TABS.map(([key, label]) => {
               const count = counts
                 ? key === 'any'
-                  ? Object.values(counts).reduce((a, b) => a + b, 0)
+                  ? Object.entries(counts).reduce((a, [k, v]) => a + (k === 'trash' ? 0 : v), 0)
                   : counts[key]
                 : null;
               return (
@@ -156,7 +178,7 @@ export default function PostsPage() {
         <div className={styles.body} aria-live="polite">
           {!loading && error && (
             <div className={`${styles.state} ${styles.fadeIn}`}>
-              <Banner message={error.message} />
+              <Banner message={error.message} onDismiss={refetch} />
               <button type="button" className={styles.retryBtn} onClick={refetch}>
                 Try again
               </button>
@@ -230,6 +252,7 @@ export default function PostsPage() {
                           const excerpt = plainText(
                             post.excerpt?.raw || post.excerpt?.rendered || '',
                           );
+                          const isTrashed = post.status === 'trash';
                           return (
                             <tr key={post.id} className={styles.fadeIn}>
                               <td className={styles.cThumb}>
@@ -245,12 +268,16 @@ export default function PostsPage() {
                                 )}
                               </td>
                               <td>
-                                <Link
-                                  to={`/posts/${post.id}/edit`}
-                                  className={styles.postTitle}
-                                >
-                                  {title}
-                                </Link>
+                                {isTrashed ? (
+                                  <span className={styles.postTitle}>{title}</span>
+                                ) : (
+                                  <Link
+                                    to={`/posts/${post.id}/edit`}
+                                    className={styles.postTitle}
+                                  >
+                                    {title}
+                                  </Link>
+                                )}
                                 {excerpt && (
                                   <p className={styles.excerpt}>
                                     {excerpt.length > 160
@@ -269,12 +296,23 @@ export default function PostsPage() {
                                 </span>
                               </td>
                               <td className={styles.cActions}>
-                                <Link
-                                  to={`/posts/${post.id}/edit`}
-                                  className={styles.actionBtn}
-                                >
-                                  Edit
-                                </Link>
+                                {isTrashed ? (
+                                  <button
+                                    type="button"
+                                    className={styles.actionBtn}
+                                    disabled={restoringId === post.id}
+                                    onClick={() => handleRestore(post)}
+                                  >
+                                    {restoringId === post.id ? 'Restoring…' : 'Restore'}
+                                  </button>
+                                ) : (
+                                  <Link
+                                    to={`/posts/${post.id}/edit`}
+                                    className={styles.actionBtn}
+                                  >
+                                    Edit
+                                  </Link>
+                                )}
                                 <button
                                   type="button"
                                   className={`${styles.actionBtn} ${styles.actionDanger}`}
@@ -339,7 +377,7 @@ export default function PostsPage() {
       <ConfirmDialog
         open={!!deleting}
         title="Delete post"
-        confirmLabel={permanent ? 'Delete permanently' : 'Move to Trash'}
+        confirmLabel={deleting?.status === 'trash' ? 'Delete permanently' : permanent ? 'Delete permanently' : 'Move to Trash'}
         danger
         busy={deleteBusy}
         onConfirm={handleDelete}
@@ -348,17 +386,21 @@ export default function PostsPage() {
         {deleting && (
           <>
             <p>
-              Are you sure you want to delete <strong>{deleting.title?.raw || '(no title)'}</strong>?
+              {deleting.status === 'trash'
+                ? <>This will permanently delete <strong>{deleting.title?.raw || '(no title)'}</strong> and all its data. This can't be undone.</>
+                : <>Are you sure you want to delete <strong>{deleting.title?.raw || '(no title)'}</strong>?</>}
             </p>
-            <label className={styles.checkLabel}>
-              <input
-                type="checkbox"
-                checked={permanent}
-                onChange={(e) => setPermanent(e.target.checked)}
-              />
-              Delete permanently instead. This skips the Trash and can't be undone.
-            </label>
-            {deleteError && <Banner message={deleteError} />}
+            {deleting.status !== 'trash' && (
+              <label className={styles.checkLabel}>
+                <input
+                  type="checkbox"
+                  checked={permanent}
+                  onChange={(e) => setPermanent(e.target.checked)}
+                />
+                Delete permanently instead. This skips the Trash and can't be undone.
+              </label>
+            )}
+            {deleteError && <Banner message={deleteError} onDismiss={() => setDeleteError('')} />}
           </>
         )}
       </ConfirmDialog>

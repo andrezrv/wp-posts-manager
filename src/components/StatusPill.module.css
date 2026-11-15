@@ -45,3 +45,8 @@
 .private::before {
   border-radius: 1px;
 }
+
+.trash {
+  background: var(--danger-soft);
+  color: var(--danger);
+}

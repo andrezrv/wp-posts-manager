@@ -43,7 +43,7 @@ export function getSettings() {
   return apiFetch('GET', '/wp/v2/settings');
 }
 
-const COUNT_STATUSES = ['publish', 'future', 'draft', 'pending', 'private'];
+const COUNT_STATUSES = ['publish', 'future', 'draft', 'pending', 'private', 'trash'];
 
 export async function getPostCounts() {
   const results = await Promise.all(

@@ -239,6 +239,26 @@
   word-break: break-all;
 }
 
+/* Delete button */
+.deleteBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 13.5px/1 var(--font-body);
+  padding: 9px 16px;
+  border-radius: 7px;
+  border: 1px solid var(--danger);
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  width: 100%;
+}
+
+.deleteBtn:hover {
+  background: var(--danger-soft);
+}
+
 /* Responsive */
 @media (max-width: 760px) {
   .grid {

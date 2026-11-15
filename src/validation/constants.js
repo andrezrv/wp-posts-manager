@@ -4,6 +4,7 @@ export const STATUSES = {
   draft: 'Draft',
   pending: 'Pending review',
   private: 'Private',
+  trash: 'Trash',
 };
 
 export const LIMITS = {

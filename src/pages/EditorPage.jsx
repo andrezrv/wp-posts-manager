@@ -1,17 +1,18 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { getPost, createPost, updatePost, uploadMedia } from '../api/endpoints';
+import { getPost, createPost, updatePost, deletePost as apiDeletePost, uploadMedia } from '../api/endpoints';
 import { STATUSES } from '../validation/constants';
 import { validatePost } from '../validation/postRules';
 import { toLocalInput, toWpDate, fmtDate, safeImgSrc, formatBytes } from '../utils/format';
 import Banner from '../components/Banner';
+import ConfirmDialog from '../components/ConfirmDialog';
 import FieldError from '../components/FieldError';
 import RichEditor from '../components/RichEditor';
 import Spinner from '../components/Spinner';
 import styles from './EditorPage.module.css';
 
-const STATUS_OPTIONS = Object.entries(STATUSES);
+const STATUS_OPTIONS = Object.entries(STATUSES).filter(([k]) => k !== 'trash');
 
 function getThumbUrl(post) {
   const m = post?._embedded?.['wp:featuredmedia']?.[0];
@@ -73,6 +74,10 @@ export default function EditorPage() {
       .then((res) => {
         if (cancelled) return;
         const p = res.data;
+        if (p.status === 'trash') {
+          navigate('/posts', { replace: true, state: { trashWarning: true } });
+          return;
+        }
         setTitle(p.title?.raw || '');
         setContent(p.content?.raw || '');
         setExcerpt(p.excerpt?.raw || '');
@@ -173,6 +178,21 @@ export default function EditorPage() {
     }
   }, [saving, title, content, excerpt, status, date, imageFile, featuredMediaId, isNew, id, navigate, imagePreview]);
 
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = useCallback(async () => {
+    setDeleting(true);
+    try {
+      await apiDeletePost(id, false);
+      navigate('/posts', { replace: true });
+    } catch (err) {
+      setApiError(err.message);
+      setDeleting(false);
+      setConfirmDelete(false);
+    }
+  }, [id, navigate]);
+
   const handleKeyDown = (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 's') {
       e.preventDefault();
@@ -222,7 +242,7 @@ export default function EditorPage() {
         </div>
       </div>
 
-      {apiError && <Banner message={apiError} />}
+      {apiError && <Banner message={apiError} onDismiss={() => setApiError('')} />}
       {saved && <Banner kind="ok" message={location.state?.created ? 'Post created.' : 'Post saved.'} />}
 
       <div className={styles.grid}>
@@ -394,8 +414,32 @@ export default function EditorPage() {
 
             <FieldError message={errors.image} />
           </div>
+
+          {!isNew && (
+            <button
+              type="button"
+              className={styles.deleteBtn}
+              onClick={() => setConfirmDelete(true)}
+            >
+              Move to Trash
+            </button>
+          )}
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Delete post"
+        confirmLabel="Move to Trash"
+        danger
+        busy={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+      >
+        <p>
+          Are you sure you want to move <strong>{title || '(no title)'}</strong> to the Trash?
+        </p>
+      </ConfirmDialog>
     </div>
   );
 }

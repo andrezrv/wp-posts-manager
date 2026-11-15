@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { listPosts, deletePost as apiDeletePost } from '../api/endpoints';
+import { listPosts, deletePost as apiDeletePost, updatePost as apiUpdatePost } from '../api/endpoints';
 
 export default function usePosts(filters) {
   const [data, setData] = useState({ posts: [], total: 0, totalPages: 0 });
@@ -37,5 +37,9 @@ export default function usePosts(filters) {
     await apiDeletePost(id, force);
   }, []);
 
-  return { ...data, loading, error, refetch: load, deletePost };
+  const restorePost = useCallback(async (id) => {
+    await apiUpdatePost(id, { status: 'draft' });
+  }, []);
+
+  return { ...data, loading, error, refetch: load, deletePost, restorePost };
 }
