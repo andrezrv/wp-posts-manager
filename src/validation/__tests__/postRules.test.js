@@ -38,6 +38,11 @@ describe('validatePost', () => {
     expect(result.content).toMatch(/required/i);
   });
 
+  it('requires content when only empty HTML tags are present', () => {
+    const result = validatePost({ ...valid, content: '<p></p>' });
+    expect(result.content).toMatch(/required/i);
+  });
+
   it('allows empty excerpt', () => {
     const result = validatePost({ ...valid, excerpt: '' });
     expect(result.excerpt).toBeUndefined();
