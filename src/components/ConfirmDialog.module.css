@@ -1,7 +1,7 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 15, 22, 0.55);
+  background: var(--overlay);
   display: grid;
   place-items: center;
   padding: 20px;
@@ -85,7 +85,7 @@
 .danger {
   background: var(--danger);
   border-color: var(--danger);
-  color: #fff;
+  color: var(--danger-ink);
 }
 
 .danger:hover {
