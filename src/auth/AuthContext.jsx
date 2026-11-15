@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { configureClient } from '../api/client';
-import { verifyLogin } from '../api/endpoints';
+import { verifyLogin, getSettings } from '../api/endpoints';
 import { basicAuth } from '../utils/format';
 import { handle as mockHandle } from '../mock/mockServer';
 
@@ -71,7 +71,17 @@ export function AuthProvider({ children }) {
       );
     }
 
-    const s = { auth, user, siteUrl: site, mode };
+    let postsPerPage = 10;
+    try {
+      const settingsRes = await getSettings();
+      if (settingsRes.data?.posts_per_page) {
+        postsPerPage = settingsRes.data.posts_per_page;
+      }
+    } catch (_) {
+      /* settings endpoint may not be accessible — use default */
+    }
+
+    const s = { auth, user, siteUrl: site, mode, postsPerPage };
     sessionRef.current = s;
     setSession(s);
     saveSession(s);

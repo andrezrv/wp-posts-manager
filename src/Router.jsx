@@ -2,7 +2,7 @@ import { createHashRouter, Navigate } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
 import ProtectedRoute from './auth/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
+import PostsPage from './pages/PostsPage';
 
 export const router = createHashRouter([
   {
@@ -17,7 +17,7 @@ export const router = createHashRouter([
         children: [
           {
             path: '/posts',
-            element: <DashboardPage />,
+            element: <PostsPage />,
           },
         ],
       },

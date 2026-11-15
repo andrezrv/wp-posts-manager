@@ -1,4 +1,4 @@
-import { users } from './seedData';
+import { users, posts, media, STATUSES_LIST, addMedia, toWpDate } from './seedData';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -50,19 +50,109 @@ function fail(status, code, message, data) {
   });
 }
 
+function clone(o) {
+  return JSON.parse(JSON.stringify(o));
+}
+
+function withEmbed(p, q) {
+  const out = clone(p);
+  if (q.has('_embed') && p.featured_media && media.has(p.featured_media)) {
+    out._embedded = { 'wp:featuredmedia': [clone(media.get(p.featured_media))] };
+  }
+  return out;
+}
+
 export async function handle(method, url, body, headers) {
   await sleep(200 + Math.random() * 200);
 
   const u = new URL(url, 'https://riverside-garden.test');
   const path = u.pathname.replace(/^\/wp-json/, '');
+  const q = u.searchParams;
   const a = authenticate(headers.Authorization);
   if (a.error) return a.error;
   const user = a.user;
 
+  // GET /wp/v2/users/me
   if (path === '/wp/v2/users/me' && method === 'GET') {
     if (!user) return fail(401, 'rest_not_logged_in', 'You are not currently logged in.');
     const { appPassword, ...pub } = user;
-    return reply(200, structuredClone(pub));
+    return reply(200, clone(pub));
+  }
+
+  // GET /wp/v2/settings
+  if (path === '/wp/v2/settings' && method === 'GET') {
+    if (!user) return fail(401, 'rest_not_logged_in', 'You are not currently logged in.');
+    return reply(200, { posts_per_page: 10 });
+  }
+
+  // GET /wp/v2/posts
+  if (path === '/wp/v2/posts' && method === 'GET') {
+    if (q.get('context') === 'edit' && !user) {
+      return fail(401, 'rest_forbidden_context', 'Sorry, you are not allowed to edit posts.');
+    }
+
+    const statuses = (q.get('status') || 'publish').split(',');
+    const bad = statuses.find((s) => !STATUSES_LIST.includes(s) && s !== 'trash');
+    if (bad) {
+      return fail(400, 'rest_invalid_param', 'Invalid parameter(s): status', {
+        params: { status: 'status is not one of publish, future, draft, pending, private, trash.' },
+      });
+    }
+
+    const search = (q.get('search') || '').toLowerCase();
+    let list = [...posts.values()].filter((p) => statuses.includes(p.status));
+    if (search) {
+      list = list.filter(
+        (p) =>
+          (p.title.raw + ' ' + p.content.raw + ' ' + p.excerpt.raw).toLowerCase().includes(search),
+      );
+    }
+    list.sort((x, y) => new Date(y.date) - new Date(x.date));
+
+    const per = Math.min(100, Math.max(1, Number(q.get('per_page')) || 10));
+    const page = Math.max(1, Number(q.get('page')) || 1);
+    const total = list.length;
+    const totalPages = Math.max(1, Math.ceil(total / per));
+
+    if (page > totalPages && total > 0) {
+      return fail(
+        400,
+        'rest_post_invalid_page_number',
+        'The page number requested is larger than the number of pages available.',
+      );
+    }
+
+    return reply(
+      200,
+      list.slice((page - 1) * per, page * per).map((p) => withEmbed(p, q)),
+      { 'X-WP-Total': total, 'X-WP-TotalPages': totalPages },
+    );
+  }
+
+  // GET/POST/DELETE /wp/v2/posts/:id
+  const postMatch = path.match(/^\/wp\/v2\/posts\/(\d+)$/);
+  if (postMatch) {
+    const id = Number(postMatch[1]);
+    const post = posts.get(id);
+    if (!post) return fail(404, 'rest_post_invalid_id', 'Invalid post ID.');
+
+    if (method === 'GET') {
+      if (q.get('context') === 'edit' && !user) {
+        return fail(401, 'rest_forbidden_context', 'Sorry, you are not allowed to edit this post.');
+      }
+      return reply(200, withEmbed(post, q));
+    }
+
+    if (method === 'DELETE') {
+      if (!user) return fail(401, 'rest_cannot_delete', 'Sorry, you are not allowed to delete this post.');
+      if (q.get('force') === 'true') {
+        posts.delete(id);
+        return reply(200, { deleted: true, previous: clone(post) });
+      }
+      if (post.status === 'trash') return fail(410, 'rest_already_trashed', 'The post has already been deleted.');
+      post.status = 'trash';
+      return reply(200, clone(post));
+    }
   }
 
   return fail(404, 'rest_no_route', 'No route was found matching the URL and request method.');

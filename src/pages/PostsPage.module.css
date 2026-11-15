@@ -1,0 +1,525 @@
+.pageHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.newBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: 500 14px/1 var(--font-body);
+  padding: 10px 16px;
+  border-radius: 7px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+  cursor: pointer;
+  text-decoration: none;
+  min-height: 40px;
+}
+
+.newBtn:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--accent-ink);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  max-width: 100%;
+}
+
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font: 500 13.5px var(--font-body);
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.tab[aria-pressed='true'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.tabCount {
+  margin-left: 4px;
+  font-weight: 400;
+  opacity: 0.65;
+}
+
+.search {
+  position: relative;
+  flex: 0 1 280px;
+  min-width: 200px;
+}
+
+.search input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  min-height: 38px;
+  font: 14px var(--font-body);
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.search input:hover {
+  border-color: var(--muted);
+}
+
+.search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--focus);
+}
+
+.search svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* Table */
+.tableWrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+td {
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+tr:last-child td {
+  border-bottom: 0;
+}
+
+tbody tr {
+  transition: background 0.2s;
+}
+
+tbody tr:hover {
+  background: var(--surface-2);
+}
+
+.cThumb {
+  width: 84px;
+}
+
+.thumb {
+  width: 68px;
+  height: 46px;
+  border-radius: 5px;
+  object-fit: cover;
+  background: var(--neutral-soft);
+}
+
+.thumbEmpty {
+  display: block;
+  width: 68px;
+  height: 46px;
+  border-radius: 5px;
+  background: repeating-linear-gradient(135deg, var(--neutral-soft) 0 6px, transparent 6px 12px);
+  border: 1px dashed var(--line);
+}
+
+.postTitle {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.postTitle:hover {
+  color: var(--accent);
+}
+
+.excerpt {
+  color: var(--muted);
+  font-size: 13.5px;
+  margin-top: 3px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cStatus {
+  width: 150px;
+}
+
+.cDate {
+  width: 190px;
+  font-size: 13.5px;
+}
+
+.cDate time {
+  font-variant-numeric: tabular-nums;
+}
+
+.dateKind {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.cActions {
+  width: 150px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.actionBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 13.5px/1 var(--font-body);
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  min-height: 34px;
+}
+
+.actionBtn:hover {
+  background: var(--accent-soft);
+}
+
+.actionDanger {
+  color: var(--danger);
+}
+
+.actionDanger:hover {
+  background: var(--danger-soft);
+}
+
+/* Pagination */
+.pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  font-size: 13.5px;
+  color: var(--muted);
+  flex-wrap: wrap;
+  min-height: 58px;
+}
+
+.pageButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.pageCurrent {
+  font-family: var(--font-mono);
+  color: var(--ink);
+}
+
+.pageBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 13.5px/1 var(--font-body);
+  padding: 7px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 34px;
+}
+
+.pageBtn:hover:not(:disabled) {
+  border-color: var(--muted);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* States */
+.state {
+  padding: 48px 20px;
+  text-align: center;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+}
+
+.stateTitle {
+  font-size: 17px;
+}
+
+.stateText {
+  color: var(--muted);
+  max-width: 46ch;
+}
+
+.retryBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 14px/1 var(--font-body);
+  padding: 10px 16px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  min-height: 40px;
+}
+
+.retryBtn:hover {
+  border-color: var(--muted);
+}
+
+.linkBtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.checkLabel {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 14px;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.checkLabel input {
+  margin-top: 3px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--danger);
+}
+
+/* Skeletons — match table cell dimensions to prevent CLS */
+.skel {
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--neutral-soft), var(--surface-2), var(--neutral-soft));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fadeIn {
+  animation: fadeIn 0.3s ease-in;
+}
+
+.skelThumb {
+  display: block;
+  width: 68px;
+  height: 46px;
+  border-radius: 5px;
+}
+
+.skelTitle {
+  height: 16px;
+  width: 65%;
+  margin-bottom: 8px;
+}
+
+.skelExcerpt {
+  height: 12px;
+  width: 40%;
+}
+
+.skelPill {
+  height: 22px;
+  width: 80px;
+  border-radius: 999px;
+}
+
+.skelDate {
+  height: 14px;
+  width: 120px;
+  margin-bottom: 6px;
+}
+
+.skelDateKind {
+  height: 10px;
+  width: 70px;
+}
+
+.skelActions {
+  height: 14px;
+  width: 90px;
+  margin-left: auto;
+}
+
+.skelPageInfo {
+  height: 14px;
+  width: 130px;
+}
+
+.skelPageBtn {
+  height: 34px;
+  width: 72px;
+  border-radius: 7px;
+}
+
+.skelPageCurrent {
+  height: 14px;
+  width: 80px;
+}
+
+/* Mobile cards */
+@media (max-width: 760px) {
+  thead {
+    display: none;
+  }
+
+  table,
+  tbody,
+  tr,
+  td {
+    display: block;
+  }
+
+  tbody tr {
+    display: grid;
+    grid-template-columns: 72px 1fr;
+    gap: 4px 14px;
+    padding: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody tr:last-child {
+    border-bottom: 0;
+  }
+
+  td {
+    padding: 0;
+    border: 0;
+    width: auto !important;
+  }
+
+  .cThumb {
+    grid-row: 1 / span 3;
+  }
+
+  .thumb,
+  .thumbEmpty {
+    width: 72px;
+    height: 56px;
+  }
+
+  .cStatus,
+  .cDate {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .cDate .dateKind {
+    display: inline;
+  }
+
+  .cActions {
+    grid-column: 1 / -1;
+    text-align: left;
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .cActions .actionBtn {
+    flex: 1;
+    border-color: var(--line);
+  }
+
+  .search {
+    flex: 1 1 100%;
+  }
+}
