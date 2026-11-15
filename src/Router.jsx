@@ -3,6 +3,7 @@ import AppLayout from './components/AppLayout';
 import ProtectedRoute from './auth/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import PostsPage from './pages/PostsPage';
+import EditorPage from './pages/EditorPage';
 
 export const router = createHashRouter([
   {
@@ -18,6 +19,14 @@ export const router = createHashRouter([
           {
             path: '/posts',
             element: <PostsPage />,
+          },
+          {
+            path: '/posts/new',
+            element: <EditorPage />,
+          },
+          {
+            path: '/posts/:id/edit',
+            element: <EditorPage />,
           },
         ],
       },

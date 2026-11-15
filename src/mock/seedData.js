@@ -125,4 +125,9 @@ seed.forEach(([title, status, days, colors, content, excerpt], i) => {
   );
 });
 
-export { nextPostId, makePost, STATUSES_LIST, addMedia, toWpDate };
+let _nextPostId = nextPostId;
+export function getNextPostId() {
+  return _nextPostId++;
+}
+
+export { STATUSES_LIST, makePost, addMedia, toWpDate };

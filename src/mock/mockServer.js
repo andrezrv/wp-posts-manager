@@ -1,4 +1,4 @@
-import { users, posts, media, STATUSES_LIST, addMedia, toWpDate } from './seedData';
+import { users, posts, media, STATUSES_LIST, makePost, addMedia, toWpDate, getNextPostId } from './seedData';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -85,6 +85,37 @@ export async function handle(method, url, body, headers) {
     return reply(200, { posts_per_page: 10 });
   }
 
+  // POST /wp/v2/posts (create)
+  if (path === '/wp/v2/posts' && method === 'POST') {
+    if (!user) return fail(401, 'rest_cannot_create', 'Sorry, you are not allowed to create posts.');
+    if (!body || !body.title) return fail(400, 'rest_invalid_param', 'Missing required parameter: title');
+
+    const id = getNextPostId();
+    const now = toWpDate(new Date());
+    const post = makePost(id, {
+      title: body.title,
+      status: body.status || 'draft',
+      date: body.date || now,
+      content: body.content || '',
+      excerpt: body.excerpt || '',
+      featured_media: body.featured_media || 0,
+      modified: now,
+    });
+    posts.set(id, post);
+    return reply(201, withEmbed(post, new URLSearchParams()));
+  }
+
+  // POST /wp/v2/media (upload)
+  if (path === '/wp/v2/media' && method === 'POST') {
+    if (!user) return fail(401, 'rest_cannot_create', 'Sorry, you are not allowed to upload media.');
+    const disposition = headers['Content-Disposition'] || '';
+    const nameMatch = disposition.match(/filename="([^"]+)"/);
+    const filename = nameMatch ? nameMatch[1] : 'upload.jpg';
+    const mime = headers['Content-Type'] || 'image/jpeg';
+    const mediaId = addMedia('data:' + mime + ';base64,placeholder', mime, filename);
+    return reply(201, clone(media.get(mediaId)));
+  }
+
   // GET /wp/v2/posts
   if (path === '/wp/v2/posts' && method === 'GET') {
     if (q.get('context') === 'edit' && !user) {
@@ -140,6 +171,27 @@ export async function handle(method, url, body, headers) {
       if (q.get('context') === 'edit' && !user) {
         return fail(401, 'rest_forbidden_context', 'Sorry, you are not allowed to edit this post.');
       }
+      return reply(200, withEmbed(post, q));
+    }
+
+    if (method === 'POST') {
+      if (!user) return fail(401, 'rest_cannot_edit', 'Sorry, you are not allowed to edit this post.');
+      if (body.title !== undefined) {
+        post.title.raw = body.title;
+        post.title.rendered = body.title;
+      }
+      if (body.content !== undefined) {
+        post.content.raw = body.content;
+        post.content.rendered = body.content;
+      }
+      if (body.excerpt !== undefined) {
+        post.excerpt.raw = body.excerpt;
+        post.excerpt.rendered = body.excerpt ? '<p>' + body.excerpt + '</p>' : '';
+      }
+      if (body.status !== undefined) post.status = body.status;
+      if (body.date !== undefined) post.date = body.date;
+      if (body.featured_media !== undefined) post.featured_media = body.featured_media;
+      post.modified = toWpDate(new Date());
       return reply(200, withEmbed(post, q));
     }
 
