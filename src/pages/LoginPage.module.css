@@ -53,6 +53,32 @@
   border-radius: 8px;
 }
 
+.siteIndicator {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 7px;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  font-size: 14px;
+}
+
+.siteIndicatorLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.siteIndicatorUrl {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  color: var(--ink);
+  word-break: break-all;
+}
+
 .seg input {
   position: absolute;
   opacity: 0;

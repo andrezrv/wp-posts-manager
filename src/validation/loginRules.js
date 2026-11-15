@@ -15,7 +15,7 @@ export function validateLogin(values) {
     errors.password = 'Enter the Application Password for this user.';
   }
 
-  if (values.mode === 'live') {
+  if (values.mode === 'live' && !values.envSiteUrl) {
     let u = null;
     try {
       u = new URL(values.siteUrl);

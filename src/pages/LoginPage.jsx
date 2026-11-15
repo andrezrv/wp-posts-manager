@@ -8,12 +8,15 @@ import FieldError from '../components/FieldError';
 import Spinner from '../components/Spinner';
 import styles from './LoginPage.module.css';
 
+const mockEnabled = import.meta.env.VITE_MOCK_ENABLED === 'true';
+const envSiteUrl = import.meta.env.VITE_WP_SITE_URL || '';
+
 export default function LoginPage() {
   const { login, loginNotice } = useAuth();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState('mock');
-  const [siteUrl, setSiteUrl] = useState('');
+  const [mode, setMode] = useState(mockEnabled ? 'mock' : 'live');
+  const [siteUrl, setSiteUrl] = useState(envSiteUrl);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -34,7 +37,7 @@ export default function LoginPage() {
     if (busy) return;
 
     setApiError('');
-    const values = { mode, siteUrl, username, password };
+    const values = { mode, siteUrl, username, password, envSiteUrl };
     const validationErrors = validateLogin(values);
 
     if (Object.keys(validationErrors).length) {
@@ -68,6 +71,8 @@ export default function LoginPage() {
   };
 
   const isLive = mode === 'live';
+  const showModeToggle = mockEnabled || !envSiteUrl;
+  const showSiteUrlField = isLive && !envSiteUrl;
 
   return (
     <div className={styles.wrap}>
@@ -82,31 +87,40 @@ export default function LoginPage() {
         {loginNotice && <Banner kind="warning" message={loginNotice} />}
 
         <div className={styles.card}>
-          <fieldset className={styles.fieldset}>
-            <legend className={styles.legend}>Connect to</legend>
-            <div className={styles.seg}>
-              <input
-                type="radio"
-                name="mode"
-                id="mode-mock"
-                value="mock"
-                checked={!isLive}
-                onChange={() => setMode('mock')}
-              />
-              <label htmlFor="mode-mock">Demo site</label>
-              <input
-                type="radio"
-                name="mode"
-                id="mode-live"
-                value="live"
-                checked={isLive}
-                onChange={() => setMode('live')}
-              />
-              <label htmlFor="mode-live">My WordPress site</label>
-            </div>
-          </fieldset>
+          {showModeToggle && (
+            <fieldset className={styles.fieldset}>
+              <legend className={styles.legend}>Connect to</legend>
+              <div className={styles.seg}>
+                <input
+                  type="radio"
+                  name="mode"
+                  id="mode-mock"
+                  value="mock"
+                  checked={!isLive}
+                  onChange={() => setMode('mock')}
+                />
+                <label htmlFor="mode-mock">Demo site</label>
+                <input
+                  type="radio"
+                  name="mode"
+                  id="mode-live"
+                  value="live"
+                  checked={isLive}
+                  onChange={() => setMode('live')}
+                />
+                <label htmlFor="mode-live">My WordPress site</label>
+              </div>
+            </fieldset>
+          )}
 
-          {isLive && (
+          {isLive && envSiteUrl && (
+            <div className={styles.siteIndicator}>
+              <span className={styles.siteIndicatorLabel}>Connecting to</span>
+              <span className={styles.siteIndicatorUrl}>{envSiteUrl}</span>
+            </div>
+          )}
+
+          {showSiteUrlField && (
             <div className={styles.field}>
               <label htmlFor="f-siteUrl">Site address</label>
               <input

@@ -71,4 +71,14 @@ describe('validateLogin', () => {
     const errors = validateLogin({ ...valid, mode: 'mock', siteUrl: '' });
     expect(errors.siteUrl).toBeUndefined();
   });
+
+  it('skips siteUrl validation when envSiteUrl is set', () => {
+    const errors = validateLogin({
+      ...valid,
+      mode: 'live',
+      siteUrl: '',
+      envSiteUrl: 'http://toptal-challenge.local',
+    });
+    expect(errors.siteUrl).toBeUndefined();
+  });
 });
