@@ -6,6 +6,7 @@
   border-radius: 7px;
   font-size: 14px;
   border: 1px solid transparent;
+  margin-bottom: 12px;
 }
 
 .error {
@@ -20,8 +21,27 @@
   border-color: color-mix(in srgb, var(--warn) 30%, transparent);
 }
 
+.ok {
+  background: var(--ok-soft);
+  color: var(--ok);
+  border-color: color-mix(in srgb, var(--ok) 25%, transparent);
+  font-weight: 500;
+  animation: bannerIn 0.3s ease-out;
+}
+
 .info {
   background: var(--accent-soft);
   color: var(--ink);
   border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+
+@keyframes bannerIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
