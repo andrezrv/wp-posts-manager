@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 import { getPost, createPost, updatePost, uploadMedia } from '../api/endpoints';
 import { STATUSES } from '../validation/constants';
 import { validatePost } from '../validation/postRules';
 import { toLocalInput, toWpDate, fmtDate, safeImgSrc, formatBytes } from '../utils/format';
 import Banner from '../components/Banner';
 import FieldError from '../components/FieldError';
+import RichEditor from '../components/RichEditor';
 import Spinner from '../components/Spinner';
 import styles from './EditorPage.module.css';
 
@@ -20,7 +22,10 @@ function getThumbUrl(post) {
 export default function EditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { session } = useAuth();
   const isNew = !id;
+  const wpEditUrl = !isNew && session?.siteUrl ? `${session.siteUrl}/wp-admin/post.php?post=${id}&action=edit` : '';
 
   const [loading, setLoading] = useState(!isNew);
   const [loadError, setLoadError] = useState('');
@@ -35,6 +40,7 @@ export default function EditorPage() {
   const [featuredMediaId, setFeaturedMediaId] = useState(0);
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState('');
+  const editorRef = useRef(null);
 
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState('');
@@ -42,7 +48,7 @@ export default function EditorPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setSaved(false);
+    setSaved(location.state?.created || false);
     setApiError('');
     setErrors({});
     setImageFile(null);
@@ -114,9 +120,11 @@ export default function EditorPage() {
   const handleSave = useCallback(async () => {
     if (saving) return;
 
+    const finalContent = editorRef.current ? editorRef.current.getContent() : content;
+
     setApiError('');
     setSaved(false);
-    const validationErrors = validatePost({ title, content, excerpt, imageFile });
+    const validationErrors = validatePost({ title, content: finalContent, excerpt, imageFile });
 
     if (Object.keys(validationErrors).length) {
       setErrors(validationErrors);
@@ -136,7 +144,7 @@ export default function EditorPage() {
 
       const postData = {
         title,
-        content,
+        content: finalContent,
         excerpt,
         status,
         featured_media: mediaId,
@@ -148,7 +156,7 @@ export default function EditorPage() {
 
       if (isNew) {
         const res = await createPost(postData);
-        navigate(`/posts/${res.data.id}/edit`, { replace: true });
+        navigate(`/posts/${res.data.id}/edit`, { replace: true, state: { created: true } });
       } else {
         await updatePost(id, postData);
         setSaved(true);
@@ -201,8 +209,21 @@ export default function EditorPage() {
         <Link to="/posts" className={styles.backLink}>
           &larr; Posts
         </Link>
-        <h1>{isNew ? 'New post' : 'Edit post'}</h1>
+        <div className={styles.titleRow}>
+          <h1>{isNew ? 'New post' : 'Edit post'}</h1>
+          {wpEditUrl && (
+            <a href={wpEditUrl} target="_blank" rel="noopener noreferrer" className={styles.wpLink}>
+              Open in WordPress
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M4.5 1.5H2a.5.5 0 00-.5.5v8a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V7.5M7 1.5h3.5V5M6 6l4.5-4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
+          )}
+        </div>
       </div>
+
+      {apiError && <Banner message={apiError} />}
+      {saved && <Banner kind="ok" message={location.state?.created ? 'Post created.' : 'Post saved.'} />}
 
       <div className={styles.grid}>
         <div className={styles.main}>
@@ -227,18 +248,16 @@ export default function EditorPage() {
             </div>
 
             <div className={styles.field}>
-              <label htmlFor="f-content">Content</label>
-              <textarea
-                id="f-content"
-                rows={14}
+              <label id="content-label">Content</label>
+              <RichEditor
+                ref={editorRef}
                 value={content}
-                onChange={(e) => {
-                  setContent(e.target.value);
+                onChange={(html) => {
+                  setContent(html);
                   clearFieldError('content');
                   setSaved(false);
                 }}
-                aria-invalid={!!errors.content || undefined}
-                aria-describedby="f-content-error"
+                invalid={!!errors.content}
               />
               <FieldError id="f-content-error" message={errors.content} />
             </div>
@@ -301,9 +320,6 @@ export default function EditorPage() {
               />
               <p className={styles.hint}>Leave empty to publish immediately.</p>
             </div>
-
-            {apiError && <Banner message={apiError} />}
-            {saved && <Banner kind="ok" message="Post saved." />}
 
             <button
               type="button"

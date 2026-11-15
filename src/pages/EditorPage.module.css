@@ -27,6 +27,26 @@
   color: var(--accent);
 }
 
+.titleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.wpLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13.5px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.wpLink:hover {
+  color: var(--accent);
+}
+
 .grid {
   display: grid;
   grid-template-columns: 1fr 320px;

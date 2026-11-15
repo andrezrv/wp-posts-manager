@@ -1,0 +1,235 @@
+.wrap {
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.wrap:hover {
+  border-color: var(--muted);
+}
+
+.wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: var(--focus);
+}
+
+.invalid {
+  border-color: var(--danger) !important;
+}
+
+/* Header with toolbar + mode tabs */
+.header {
+  display: flex;
+  align-items: center;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.modeTabs {
+  display: flex;
+  margin-left: auto;
+  padding: 4px 6px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.modeTab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font: 500 12px/1 var(--font-body);
+  color: var(--muted);
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.modeTab:hover {
+  color: var(--ink);
+}
+
+.modeActive {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Toolbar */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.tbGroup {
+  display: flex;
+  gap: 2px;
+}
+
+.tbBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  font: 500 13px/1 var(--font-body);
+  cursor: pointer;
+}
+
+.tbBtn:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.tbActive {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.tbSep {
+  width: 1px;
+  height: 20px;
+  background: var(--line);
+  margin: 0 4px;
+}
+
+/* Editor content area */
+.content {
+  min-height: 280px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.content :global(.tiptap) {
+  padding: 12px 14px;
+  min-height: 280px;
+  outline: none;
+  font: 15px/1.65 var(--font-body);
+  color: var(--ink);
+}
+
+.content :global(.tiptap p.is-editor-empty:first-child::before) {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  opacity: 0.5;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.content :global(.tiptap p) {
+  margin: 0 0 0.6em;
+}
+
+.content :global(.tiptap h2) {
+  font-size: 1.4em;
+  font-weight: 600;
+  margin: 1em 0 0.4em;
+}
+
+.content :global(.tiptap h3) {
+  font-size: 1.2em;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+}
+
+.content :global(.tiptap h4) {
+  font-size: 1.05em;
+  font-weight: 600;
+  margin: 0.7em 0 0.3em;
+}
+
+.content :global(.tiptap ul),
+.content :global(.tiptap ol) {
+  padding-left: 1.4em;
+  margin: 0 0 0.6em;
+}
+
+.content :global(.tiptap li) {
+  margin-bottom: 0.2em;
+}
+
+.content :global(.tiptap blockquote) {
+  border-left: 3px solid var(--accent);
+  padding-left: 14px;
+  margin: 0.6em 0;
+  color: var(--muted);
+}
+
+.content :global(.tiptap pre) {
+  background: var(--surface-2);
+  border-radius: 5px;
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  overflow-x: auto;
+  margin: 0.6em 0;
+}
+
+.content :global(.tiptap code) {
+  background: var(--surface-2);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+.content :global(.tiptap a) {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.content :global(.tiptap hr) {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 1em 0;
+}
+
+.content :global(.tiptap strong) {
+  font-weight: 600;
+}
+
+/* Locked blocks (unsupported block types preserved as read-only) */
+.content :global(.wp-locked) {
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+  border-radius: 5px;
+  padding: 12px 14px;
+  margin: 0.6em 0;
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.content :global(.wp-locked) :global(strong) {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* HTML mode textarea */
+.htmlArea {
+  width: 100%;
+  min-height: 280px;
+  max-height: 600px;
+  padding: 12px 14px;
+  border: 0;
+  resize: vertical;
+  font: 13.5px/1.6 var(--font-mono);
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+}

@@ -4,6 +4,7 @@ export function validatePost(values) {
   const errors = {};
   const title = (values.title || '').trim();
   const content = (values.content || '').trim();
+  const contentText = content.replace(/<[^>]*>/g, '').trim();
 
   if (!title) {
     errors.title = 'Title is required.';
@@ -13,7 +14,7 @@ export function validatePost(values) {
     errors.title = 'Title contains invalid characters.';
   }
 
-  if (!content) {
+  if (!contentText) {
     errors.content = 'Content is required.';
   } else if (content.length > LIMITS.content) {
     errors.content = 'Content is too long.';
