@@ -12,6 +12,7 @@ const ICON_MARK = (
 export default function TopBar() {
   const { session, logout } = useAuth();
 
+  const avatarUrl = session?.user.avatar_urls?.['48'] || session?.user.avatar_urls?.['96'] || '';
   const initials = session
     ? session.user.name
         .split(/\s+/)
@@ -39,7 +40,11 @@ export default function TopBar() {
         <span className={styles.spacer} />
         {session && (
           <div className={styles.user}>
-            <span className={styles.avatar}>{initials}</span>
+            {avatarUrl ? (
+              <img className={styles.avatar} src={avatarUrl} alt="" />
+            ) : (
+              <span className={styles.avatar}>{initials}</span>
+            )}
             <span className={styles.userName}>
               {session.user.name}
               <span className={styles.userRole}>{role}</span>
