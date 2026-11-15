@@ -404,6 +404,9 @@ export default function EditorPage() {
               accept="image/jpeg,image/png,image/gif,image/webp"
               className={styles.fileInput}
               onChange={handleImageChange}
+              aria-label="Featured image"
+              aria-invalid={!!errors.image || undefined}
+              aria-describedby="f-image-error"
             />
 
             {imageFile && (
@@ -412,7 +415,7 @@ export default function EditorPage() {
               </p>
             )}
 
-            <FieldError message={errors.image} />
+            <FieldError id="f-image-error" message={errors.image} />
           </div>
 
           {!isNew && (

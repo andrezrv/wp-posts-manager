@@ -131,7 +131,7 @@ function Toolbar({ editor }) {
           onClick={addLink}
           title="Link"
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path
               d="M6.5 9.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1M9.5 6.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1"
               stroke="currentColor"
@@ -254,13 +254,14 @@ const RichEditor = forwardRef(function RichEditor({ value, onChange, invalid }, 
       </div>
 
       {mode === 'visual' ? (
-        <EditorContent editor={editor} className={styles.content} />
+        <EditorContent editor={editor} className={styles.content} aria-labelledby="content-label" />
       ) : (
         <textarea
           className={styles.htmlArea}
           value={htmlDraft}
           onChange={handleHtmlChange}
           spellCheck={false}
+          aria-label="Content (HTML)"
         />
       )}
     </div>

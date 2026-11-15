@@ -11,7 +11,7 @@ export default function Banner({ message, kind = 'error', children, onDismiss })
   if (!message && !children) return null;
 
   return (
-    <div className={`${styles.banner} ${styles[kind]}`} role="alert">
+    <div className={`${styles.banner} ${styles[kind]}`} role={kind === 'ok' ? 'status' : 'alert'}>
       {kind === 'ok' && <CheckIcon />}
       <span className={styles.text}>{message || children}</span>
       {onDismiss && (
