@@ -101,22 +101,21 @@
   border-color: var(--muted);
 }
 
-.logoutBtn {
-  appearance: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font: 500 13.5px/1 var(--font-body);
-  padding: 7px 10px;
+.adminBtn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
   border-radius: 7px;
   border: 1px solid var(--line);
   background: var(--surface);
-  color: var(--ink);
-  cursor: pointer;
-  min-height: 34px;
+  color: var(--muted);
+  text-decoration: none;
+  flex: none;
 }
 
-.logoutBtn:hover {
+.adminBtn:hover {
+  color: var(--ink);
   border-color: var(--muted);
 }
 

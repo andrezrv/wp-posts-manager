@@ -1,0 +1,26 @@
+.footer {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+  display: flex;
+  justify-content: center;
+}
+
+.logoutBtn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 13.5px/1 var(--font-body);
+  padding: 9px 16px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.logoutBtn:hover {
+  color: var(--ink);
+  border-color: var(--muted);
+}

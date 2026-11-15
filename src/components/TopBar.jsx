@@ -51,7 +51,7 @@ const ICON_MARK = (
 );
 
 export default function TopBar() {
-  const { session, logout } = useAuth();
+  const { session } = useAuth();
   const [theme, setTheme] = useState(getInitialTheme);
 
   useEffect(() => {
@@ -109,9 +109,18 @@ export default function TopBar() {
             >
               {THEME_ICONS[theme]}
             </button>
-            <button type="button" className={styles.logoutBtn} onClick={logout}>
-              Log out
-            </button>
+            <a
+              href={`${session.siteUrl}/wp-admin/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.adminBtn}
+              aria-label="Open WordPress admin"
+              title="Open WordPress admin"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6 3.5H3.5a1 1 0 00-1 1V12.5a1 1 0 001 1H11.5a1 1 0 001-1V10M9.5 2.5h4m0 0v4m0-4l-6 6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </a>
           </div>
         )}
         {!session && (
