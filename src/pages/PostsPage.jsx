@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import usePosts from '../hooks/usePosts';
 import usePostCounts from '../hooks/usePostCounts';
@@ -21,6 +21,8 @@ const STATUS_TABS = [
   ['private', 'Private'],
   ['trash', 'Trash'],
 ];
+
+const VALID_STATUSES = new Set(STATUS_TABS.map(([k]) => k));
 
 function getThumb(post) {
   const embedded = post._embedded?.['wp:featuredmedia']?.[0];
@@ -45,12 +47,27 @@ function dateValue(post) {
 export default function PostsPage() {
   const { session } = useAuth();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const perPage = session?.postsPerPage || 10;
 
-  const [status, setStatus] = useState('any');
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
+  const rawStatus = searchParams.get('status') || 'any';
+  const status = VALID_STATUSES.has(rawStatus) ? rawStatus : 'any';
+  const page = Math.max(1, Number(searchParams.get('page')) || 1);
+  const urlSearch = searchParams.get('q') || '';
+
+  const [search, setSearch] = useState(urlSearch);
   const debouncedSearch = useDebounce(search);
+
+  useEffect(() => {
+    if (debouncedSearch === urlSearch) return;
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (debouncedSearch) next.set('q', debouncedSearch);
+      else next.delete('q');
+      next.delete('page');
+      return next;
+    }, { replace: true });
+  }, [debouncedSearch]);
 
   const { posts, total, totalPages, loading, error, refetch, deletePost, restorePost } = usePosts({
     page,
@@ -67,13 +84,17 @@ export default function PostsPage() {
   const [permanent, setPermanent] = useState(false);
 
   const handleTabChange = (s) => {
-    setStatus(s);
-    setPage(1);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (s === 'any') next.delete('status');
+      else next.set('status', s);
+      next.delete('page');
+      return next;
+    });
   };
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
-    setPage(1);
   };
 
   const openDelete = (post) => {
@@ -197,7 +218,15 @@ export default function PostsPage() {
                     <button
                       type="button"
                       className={styles.linkBtn}
-                      onClick={() => setSearch('')}
+                      onClick={() => {
+                        setSearch('');
+                        setSearchParams((prev) => {
+                          const next = new URLSearchParams(prev);
+                          next.delete('q');
+                          next.delete('page');
+                          return next;
+                        }, { replace: true });
+                      }}
                     >
                       Clear search
                     </button>
@@ -348,7 +377,13 @@ export default function PostsPage() {
                         type="button"
                         className={styles.pageBtn}
                         disabled={page <= 1}
-                        onClick={() => setPage((p) => p - 1)}
+                        onClick={() => setSearchParams((prev) => {
+                          const next = new URLSearchParams(prev);
+                          const p = page - 1;
+                          if (p <= 1) next.delete('page');
+                          else next.set('page', String(p));
+                          return next;
+                        })}
                       >
                         Previous
                       </button>
@@ -359,7 +394,11 @@ export default function PostsPage() {
                         type="button"
                         className={styles.pageBtn}
                         disabled={page >= totalPages}
-                        onClick={() => setPage((p) => p + 1)}
+                        onClick={() => setSearchParams((prev) => {
+                          const next = new URLSearchParams(prev);
+                          next.set('page', String(page + 1));
+                          return next;
+                        })}
                       >
                         Next
                       </button>
