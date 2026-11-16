@@ -87,13 +87,15 @@ export function AuthProvider({ children }) {
     }
 
     let postsPerPage = POSTS_PER_PAGE;
-    try {
-      const settingsRes = await getSettings();
-      if (settingsRes.data?.posts_per_page) {
-        postsPerPage = settingsRes.data.posts_per_page;
+    if (!import.meta.env.VITE_POSTS_PER_PAGE) {
+      try {
+        const settingsRes = await getSettings();
+        if (settingsRes.data?.posts_per_page) {
+          postsPerPage = settingsRes.data.posts_per_page;
+        }
+      } catch (_) {
+        /* settings endpoint may not be accessible — use default */
       }
-    } catch (_) {
-      /* settings endpoint may not be accessible — use default */
     }
 
     const s = { auth, user, siteUrl: site, mode, postsPerPage };

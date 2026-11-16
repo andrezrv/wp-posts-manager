@@ -48,7 +48,9 @@ export default function PostsPage() {
   const { session } = useAuth();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const perPage = session?.postsPerPage || POSTS_PER_PAGE;
+  const perPage = import.meta.env.VITE_POSTS_PER_PAGE
+    ? POSTS_PER_PAGE
+    : session?.postsPerPage || POSTS_PER_PAGE;
 
   const rawStatus = searchParams.get('status') || 'any';
   const status = VALID_STATUSES.has(rawStatus) ? rawStatus : 'any';
