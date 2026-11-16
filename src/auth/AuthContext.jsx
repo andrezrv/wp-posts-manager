@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- runs once on mount; session is read via ref
 
   const login = useCallback(async (mode, siteUrl, username, password) => {
     const auth = basicAuth(username, password);

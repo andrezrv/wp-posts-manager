@@ -159,17 +159,20 @@ const RichEditor = forwardRef(function RichEditor({ value, onChange, invalid }, 
   const rawRef = useRef(value || '');
   const dirtyRef = useRef(false);
 
-  if (!bridgeRef.current) {
+  /* eslint-disable react-hooks/refs -- lazy one-time init of immutable values */
+  if (bridgeRef.current == null) {
     bridgeRef.current = createBlockBridge();
   }
   const bridge = bridgeRef.current;
 
   const prepared = useRef(null);
-  if (!prepared.current) {
+  if (prepared.current == null) {
     prepared.current = bridge.toVisual(rawRef.current);
   }
   const blockMode = prepared.current.blockMode;
+  /* eslint-enable react-hooks/refs */
 
+  /* eslint-disable react-hooks/refs -- bridge/blockMode/prepared are stable lazy-init values */
   const editor = useEditor({
     extensions,
     content: prepared.current.html || '',
@@ -196,6 +199,7 @@ const RichEditor = forwardRef(function RichEditor({ value, onChange, invalid }, 
     if (blockMode) return bridge.toRaw(editor.view.dom);
     return editor.getHTML();
   }, [mode, htmlDraft, editor, blockMode, bridge]);
+  /* eslint-enable react-hooks/refs */
 
   useImperativeHandle(ref, () => ({ getContent }), [getContent]);
 

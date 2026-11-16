@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import { getPost, createPost, updatePost, deletePost as apiDeletePost, uploadMedia } from '../api/endpoints';
 import { STATUSES, IMAGE_TYPES, DEFAULT_POST_STATUS } from '../validation/constants';
 import { validatePost } from '../validation/postRules';
-import { toLocalInput, toWpDate, fmtDate, safeImgSrc, formatBytes } from '../utils/format';
+import { toLocalInput, toWpDate, safeImgSrc, formatBytes } from '../utils/format';
 import Banner from '../components/Banner';
 import ConfirmDialog from '../components/ConfirmDialog';
 import FieldError from '../components/FieldError';
@@ -49,7 +49,7 @@ export default function EditorPage() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setSaved(location.state?.created || false);
+    setSaved(location.state?.created || false); // eslint-disable-line react-hooks/set-state-in-effect -- resets form on route change
     setApiError('');
     setErrors({});
     setImageFile(null);
@@ -96,7 +96,7 @@ export default function EditorPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, isNew]);
+  }, [id, isNew, navigate, location.state?.created]);
 
   const clearFieldError = (field) => {
     setErrors((prev) => {

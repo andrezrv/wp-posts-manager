@@ -75,7 +75,7 @@ export async function handle(method, url, body, headers) {
   // GET /wp/v2/users/me
   if (path === '/wp/v2/users/me' && method === 'GET') {
     if (!user) return fail(401, 'rest_not_logged_in', 'You are not currently logged in.');
-    const { appPassword, ...pub } = user;
+    const { appPassword: _pwd, ...pub } = user;
     return reply(200, clone(pub));
   }
 

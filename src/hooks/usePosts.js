@@ -30,7 +30,7 @@ export default function usePosts(filters) {
   }, [filters.page, filters.perPage, filters.search, filters.status]);
 
   useEffect(() => {
-    load();
+    load(); // eslint-disable-line react-hooks/set-state-in-effect -- data fetch sets state after await
   }, [load]);
 
   const deletePost = useCallback(async (id, force) => {

@@ -1,4 +1,4 @@
-import { Node, mergeAttributes } from '@tiptap/react';
+import { Node } from '@tiptap/react';
 
 export const LockedBlock = Node.create({
   name: 'lockedBlock',

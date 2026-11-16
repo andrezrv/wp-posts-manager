@@ -4,12 +4,11 @@ import { useAuth } from '../auth/AuthContext';
 import usePosts from '../hooks/usePosts';
 import usePostCounts from '../hooks/usePostCounts';
 import useDebounce from '../hooks/useDebounce';
-import { STATUSES, POSTS_PER_PAGE, EXCERPT_PREVIEW_LENGTH } from '../validation/constants';
+import { POSTS_PER_PAGE, EXCERPT_PREVIEW_LENGTH } from '../validation/constants';
 import { plainText, fmtDate, safeImgSrc } from '../utils/format';
 import StatusPill from '../components/StatusPill';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Banner from '../components/Banner';
-import Spinner from '../components/Spinner';
 import styles from './PostsPage.module.css';
 
 const STATUS_TABS = [
@@ -69,7 +68,7 @@ export default function PostsPage() {
       next.delete('page');
       return next;
     }, { replace: true });
-  }, [debouncedSearch]);
+  }, [debouncedSearch, urlSearch, setSearchParams]);
 
   const { posts, total, totalPages, loading, error, refetch, deletePost, restorePost } = usePosts({
     page,

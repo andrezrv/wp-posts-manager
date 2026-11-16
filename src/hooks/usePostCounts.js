@@ -16,7 +16,7 @@ export default function usePostCounts() {
   }, []);
 
   useEffect(() => {
-    fetch();
+    fetch(); // eslint-disable-line react-hooks/set-state-in-effect -- data fetch sets state after await
   }, [fetch]);
 
   return { counts, refetchCounts: fetch };

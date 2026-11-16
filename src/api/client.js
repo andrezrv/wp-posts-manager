@@ -41,7 +41,7 @@ export async function apiFetch(method, path, opts = {}) {
     } else {
       res = await remoteFetch(method, siteUrl + url, body, h);
     }
-  } catch (e) {
+  } catch (_e) {
     throw new ApiError(
       0,
       'network_error',
