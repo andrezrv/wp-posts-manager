@@ -3,6 +3,7 @@ import { configureClient } from '../api/client';
 import { verifyLogin, getSettings } from '../api/endpoints';
 import { basicAuth } from '../utils/format';
 import { handle as mockHandle } from '../mock/mockServer';
+import { POSTS_PER_PAGE } from '../validation/constants';
 
 const SESSION_KEY = 'wp_posts_manager_session';
 const AuthContext = createContext(null);
@@ -85,7 +86,7 @@ export function AuthProvider({ children }) {
       );
     }
 
-    let postsPerPage = 10;
+    let postsPerPage = POSTS_PER_PAGE;
     try {
       const settingsRes = await getSettings();
       if (settingsRes.data?.posts_per_page) {

@@ -1,5 +1,8 @@
 import { apiFetch } from './client';
 
+const POSTS_ORDER_BY = import.meta.env.VITE_POSTS_ORDER_BY || 'date';
+const POSTS_ORDER = import.meta.env.VITE_POSTS_ORDER || 'desc';
+
 export function verifyLogin(auth) {
   return apiFetch('GET', '/wp/v2/users/me', { query: { context: 'edit' }, auth });
 }
@@ -11,8 +14,8 @@ export function listPosts({ page, perPage, search, status }) {
       page,
       per_page: perPage,
       search,
-      orderby: 'date',
-      order: 'desc',
+      orderby: POSTS_ORDER_BY,
+      order: POSTS_ORDER,
       status: status === 'any' ? 'publish,future,draft,pending,private' : status,
       _embed: 'wp:featuredmedia',
     },

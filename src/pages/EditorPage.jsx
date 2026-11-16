@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { getPost, createPost, updatePost, deletePost as apiDeletePost, uploadMedia } from '../api/endpoints';
-import { STATUSES } from '../validation/constants';
+import { STATUSES, IMAGE_TYPES, DEFAULT_POST_STATUS } from '../validation/constants';
 import { validatePost } from '../validation/postRules';
 import { toLocalInput, toWpDate, fmtDate, safeImgSrc, formatBytes } from '../utils/format';
 import Banner from '../components/Banner';
@@ -34,7 +34,7 @@ export default function EditorPage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [excerpt, setExcerpt] = useState('');
-  const [status, setStatus] = useState('draft');
+  const [status, setStatus] = useState(DEFAULT_POST_STATUS);
   const [date, setDate] = useState('');
 
   const [existingThumb, setExistingThumb] = useState('');
@@ -59,7 +59,7 @@ export default function EditorPage() {
       setTitle('');
       setContent('');
       setExcerpt('');
-      setStatus('draft');
+      setStatus(DEFAULT_POST_STATUS);
       setDate('');
       setExistingThumb('');
       setFeaturedMediaId(0);
@@ -406,7 +406,7 @@ export default function EditorPage() {
             <input
               type="file"
               id="f-image"
-              accept="image/jpeg,image/png,image/gif,image/webp"
+              accept={IMAGE_TYPES.join(',')}
               className={styles.fileInput}
               onChange={handleImageChange}
               aria-label="Featured image"

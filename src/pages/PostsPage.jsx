@@ -4,7 +4,7 @@ import { useAuth } from '../auth/AuthContext';
 import usePosts from '../hooks/usePosts';
 import usePostCounts from '../hooks/usePostCounts';
 import useDebounce from '../hooks/useDebounce';
-import { STATUSES } from '../validation/constants';
+import { STATUSES, POSTS_PER_PAGE, EXCERPT_PREVIEW_LENGTH } from '../validation/constants';
 import { plainText, fmtDate, safeImgSrc } from '../utils/format';
 import StatusPill from '../components/StatusPill';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -48,7 +48,7 @@ export default function PostsPage() {
   const { session } = useAuth();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const perPage = session?.postsPerPage || 10;
+  const perPage = session?.postsPerPage || POSTS_PER_PAGE;
 
   const rawStatus = searchParams.get('status') || 'any';
   const status = VALID_STATUSES.has(rawStatus) ? rawStatus : 'any';
@@ -306,8 +306,8 @@ export default function PostsPage() {
                                 )}
                                 {excerpt && (
                                   <p className={styles.excerpt}>
-                                    {excerpt.length > 160
-                                      ? excerpt.slice(0, 160) + '…'
+                                    {excerpt.length > EXCERPT_PREVIEW_LENGTH
+                                      ? excerpt.slice(0, EXCERPT_PREVIEW_LENGTH) + '…'
                                       : excerpt}
                                   </p>
                                 )}

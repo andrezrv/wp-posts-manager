@@ -40,8 +40,16 @@ Edit `.env` to configure the app:
 |---|---|---|
 | `VITE_WP_SITE_URL` | *(empty)* | WordPress site URL. When set, the login form hides the site address field. |
 | `VITE_MOCK_ENABLED` | `true` | Set to `true` to enable demo mode with a built-in mock server. |
+| `VITE_POSTS_PER_PAGE` | `10` | Fallback posts per page when WP settings endpoint is inaccessible. |
+| `VITE_MAX_IMAGE_BYTES` | `5242880` | Maximum featured image file size in bytes (5 MB). |
+| `VITE_ACCEPTED_IMAGE_TYPES` | `image/jpeg,image/png,image/gif,image/webp` | Comma-separated MIME types accepted for featured images. |
+| `VITE_DEFAULT_POST_STATUS` | `draft` | Default status for new posts. |
+| `VITE_DEBOUNCE_DELAY_MS` | `350` | Search input debounce delay in milliseconds. |
+| `VITE_POSTS_ORDER_BY` | `date` | Post list sort field (`date`, `modified`, `title`). |
+| `VITE_POSTS_ORDER` | `desc` | Post list sort direction (`asc`, `desc`). |
+| `VITE_EXCERPT_PREVIEW_LENGTH` | `160` | Maximum characters shown in the post list excerpt preview. |
 
-To connect to a real WordPress site, set `VITE_MOCK_ENABLED=false` and optionally set `VITE_WP_SITE_URL` to your site's URL.
+To connect to a real WordPress site, set `VITE_MOCK_ENABLED=false` and optionally set `VITE_WP_SITE_URL` to your site's URL. All other variables are optional — the app works with sensible defaults when they are unset.
 
 ## Running
 
