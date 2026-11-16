@@ -88,14 +88,17 @@ Tests use [Vitest](https://vitest.dev/) with [React Testing Library](https://tes
 ## Linting and formatting
 
 ```bash
-# Lint
+# Lint JavaScript and CSS
 npm run lint
+
+# Lint CSS only
+npm run lint:css
 
 # Format
 npm run format
 ```
 
-ESLint and Prettier run automatically on staged files via a Husky pre-commit hook.
+ESLint, Stylelint, and Prettier run automatically on staged files via a Husky pre-commit hook.
 
 ## Project structure
 
@@ -138,5 +141,5 @@ Key files: `src/editor/blockParser.js`, `src/editor/blockSerializer.js`, `src/ed
 - [TipTap](https://tiptap.dev/) for the rich text editor
 - CSS Modules with global custom properties for theming
 - [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/) for tests
-- [ESLint](https://eslint.org/) + [Prettier](https://prettier.io/) for code quality
+- [ESLint](https://eslint.org/) + [Stylelint](https://stylelint.io/) + [Prettier](https://prettier.io/) for code quality
 - [Husky](https://typicode.github.io/husky/) + [lint-staged](https://github.com/lint-staged/lint-staged) for pre-commit hooks

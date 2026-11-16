@@ -454,7 +454,7 @@ tbody tr:hover {
 }
 
 /* Mobile cards */
-@media (max-width: 760px) {
+@media (width <= 760px) {
   thead {
     display: none;
   }

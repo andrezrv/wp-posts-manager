@@ -21,7 +21,7 @@
   background: var(--surface);
   border-radius: 10px;
   border: 1px solid var(--line);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgb(0 0 0 / 30%);
   display: grid;
   gap: 14px;
   padding: 22px;

@@ -234,14 +234,14 @@
   padding: 6px 10px;
   border-radius: 5px;
   border: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgb(0 0 0 / 65%);
   color: #fff;
   cursor: pointer;
   backdrop-filter: blur(4px);
 }
 
 .removeImage:hover {
-  background: rgba(0, 0, 0, 0.85);
+  background: rgb(0 0 0 / 85%);
 }
 
 .imageMeta {
@@ -272,7 +272,7 @@
 }
 
 /* Responsive */
-@media (max-width: 760px) {
+@media (width <= 760px) {
   .grid {
     grid-template-columns: 1fr;
   }

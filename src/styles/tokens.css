@@ -1,27 +1,27 @@
 :root {
   --bg: #f3f5f8;
-  --surface: #ffffff;
+  --surface: #fff;
   --surface-2: #f8f9fb;
   --ink: #18202c;
   --muted: #5a6578;
   --line: #dce2ea;
   --accent: #2271b1;
   --accent-hover: #135e96;
-  --accent-ink: #ffffff;
+  --accent-ink: #fff;
   --accent-soft: #e7f0f8;
   --ok: #17784a;
   --ok-soft: #e2f3e9;
   --warn: #8f5b00;
   --warn-soft: #fbf0d9;
   --danger: #b8322a;
-  --danger-ink: #ffffff;
+  --danger-ink: #fff;
   --danger-soft: #fbe6e4;
-  --overlay: rgba(10, 15, 22, 0.55);
+  --overlay: rgb(10 15 22 / 55%);
   --info: #5145c4;
   --info-soft: #ebe9fb;
   --neutral-soft: #eceff3;
-  --focus: 0 0 0 3px rgba(34, 113, 177, 0.35);
-  --shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 6px 20px rgba(16, 24, 40, 0.06);
+  --focus: 0 0 0 3px rgb(34 113 177 / 35%);
+  --shadow: 0 1px 2px rgb(16 24 40 / 5%), 0 6px 20px rgb(16 24 40 / 6%);
   --radius: 8px;
   --font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -46,12 +46,13 @@
     --danger: #f0837a;
     --danger-ink: #1a0605;
     --danger-soft: #3a1d1b;
-    --overlay: rgba(0, 0, 0, 0.6);
+    --overlay: rgb(0 0 0 / 60%);
     --info: #a59df0;
     --info-soft: #262344;
     --neutral-soft: #232c39;
-    --focus: 0 0 0 3px rgba(106, 169, 224, 0.4);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+    --focus: 0 0 0 3px rgb(106 169 224 / 40%);
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 6px 20px rgb(0 0 0 / 25%);
+
     color-scheme: dark;
   }
 }
@@ -74,11 +75,12 @@
   --danger: #f0837a;
   --danger-ink: #1a0605;
   --danger-soft: #3a1d1b;
-  --overlay: rgba(0, 0, 0, 0.6);
+  --overlay: rgb(0 0 0 / 60%);
   --info: #a59df0;
   --info-soft: #262344;
   --neutral-soft: #232c39;
-  --focus: 0 0 0 3px rgba(106, 169, 224, 0.4);
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+  --focus: 0 0 0 3px rgb(106 169 224 / 40%);
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 6px 20px rgb(0 0 0 / 25%);
+
   color-scheme: dark;
 }
