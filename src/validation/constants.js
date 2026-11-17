@@ -7,7 +7,7 @@ export const STATUSES = {
   trash: 'Trash',
 };
 
-const rawImageTypes = import.meta.env.VITE_ACCEPTED_IMAGE_TYPES;
+const rawImageTypes = (import.meta.env.VITE_ACCEPTED_IMAGE_TYPES || '').trim();
 
 export const LIMITS = {
   title: 200,
@@ -18,7 +18,10 @@ export const LIMITS = {
 };
 
 export const IMAGE_TYPES = rawImageTypes
-  ? rawImageTypes.split(',').map((s) => s.trim())
+  ? rawImageTypes
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
   : ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 export const POSTS_PER_PAGE = Number(import.meta.env.VITE_POSTS_PER_PAGE) || 10;
