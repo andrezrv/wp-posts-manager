@@ -1,13 +1,35 @@
+/**
+ * @file Authentication context and provider.
+ *
+ * Manages the user's session lifecycle — login, logout, persistence,
+ * and cross-tab synchronization. The session is stored in localStorage
+ * so it survives page reloads and new tabs.
+ *
+ * Exports:
+ * - {@link AuthProvider} — context provider that wraps the app.
+ * - {@link useAuth} — hook to access session state and auth actions.
+ *
+ * On login, credentials are verified against the WordPress REST API
+ * (`/wp/v2/users/me`). The user must have `edit_posts` capability.
+ * Optionally fetches the site's posts-per-page setting from
+ * `/wp/v2/settings` (skipped when `VITE_POSTS_PER_PAGE` is set).
+ *
+ * If the API returns 401 during a session (e.g. revoked Application
+ * Password), the session is cleared and a notice is shown on the
+ * login page.
+ */
+
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { configureClient } from '../api/client';
 import { verifyLogin, getSettings } from '../api/endpoints';
 import { basicAuth } from '../utils/format';
-import { handle as mockHandle } from '../mock/mockServer';
 import { POSTS_PER_PAGE } from '../validation/constants';
 
+/** @constant {string} localStorage key for the serialized session. */
 const SESSION_KEY = 'wp_posts_manager_session';
 const AuthContext = createContext(null);
 
+/** Persist session to localStorage. Silently fails if storage is full or blocked. */
 function saveSession(session) {
   try {
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -16,6 +38,7 @@ function saveSession(session) {
   }
 }
 
+/** Load session from localStorage. Returns null if absent or unparseable. */
 function loadSession() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
@@ -25,6 +48,7 @@ function loadSession() {
   }
 }
 
+/** Remove session from localStorage. */
 function clearSession() {
   try {
     localStorage.removeItem(SESSION_KEY);
@@ -33,26 +57,34 @@ function clearSession() {
   }
 }
 
+/**
+ * Provides authentication state and actions to the component tree.
+ *
+ * On mount, restores a saved session from localStorage and configures
+ * the API client. Listens for `storage` events to sync login/logout
+ * across browser tabs.
+ *
+ * @param {object} props
+ * @param {React.ReactNode} props.children
+ */
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(() => loadSession());
   const [loginNotice, setLoginNotice] = useState(null);
   const sessionRef = useRef(session);
 
   useEffect(() => {
-    const mock = import.meta.env.VITE_MOCK_ENABLED === 'true' ? mockHandle : null;
     configureClient({
-      mock,
       onExpired: (message) => {
         sessionRef.current = null;
         setSession(null);
         clearSession();
         setLoginNotice(message);
-        configureClient({ auth: null, site: '', mode: 'mock' });
+        configureClient({ auth: null, site: '' });
       },
     });
 
     if (session) {
-      configureClient({ auth: session.auth, site: session.siteUrl, mode: session.mode });
+      configureClient({ auth: session.auth, site: session.siteUrl });
     }
 
     const onStorage = (e) => {
@@ -61,20 +93,20 @@ export function AuthProvider({ children }) {
       sessionRef.current = next;
       setSession(next);
       if (next) {
-        configureClient({ auth: next.auth, site: next.siteUrl, mode: next.mode });
+        configureClient({ auth: next.auth, site: next.siteUrl });
       } else {
-        configureClient({ auth: null, site: '', mode: 'mock' });
+        configureClient({ auth: null, site: '' });
       }
     };
     window.addEventListener('storage', onStorage);
     return () => window.removeEventListener('storage', onStorage);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- runs once on mount; session is read via ref
 
-  const login = useCallback(async (mode, siteUrl, username, password) => {
+  const login = useCallback(async (siteUrl, username, password) => {
     const auth = basicAuth(username, password);
-    const site = mode === 'live' ? siteUrl.replace(/\/+$/, '') : '';
+    const site = siteUrl.replace(/\/+$/, '');
 
-    configureClient({ auth, site, mode });
+    configureClient({ auth, site });
 
     const res = await verifyLogin(auth);
     const user = res.data;
@@ -98,7 +130,7 @@ export function AuthProvider({ children }) {
       }
     }
 
-    const s = { auth, user, siteUrl: site, mode, postsPerPage };
+    const s = { auth, user, siteUrl: site, postsPerPage };
     sessionRef.current = s;
     setSession(s);
     saveSession(s);
@@ -110,7 +142,7 @@ export function AuthProvider({ children }) {
     setSession(null);
     clearSession();
     setLoginNotice(null);
-    configureClient({ auth: null, site: '', mode: 'mock' });
+    configureClient({ auth: null, site: '' });
   }, []);
 
   const clearLoginNotice = useCallback(() => setLoginNotice(null), []);
@@ -127,6 +159,12 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+/**
+ * Access the authentication context.
+ *
+ * @returns {{ session: object|null, loginNotice: string|null, clearLoginNotice: Function, isAuthenticated: boolean, login: Function, logout: Function }}
+ * @throws {Error} If called outside of {@link AuthProvider}.
+ */
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');

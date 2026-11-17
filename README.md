@@ -14,13 +14,11 @@ A standalone React application for managing WordPress posts through the REST API
 - **Pagination** — server-side pagination respecting the site's posts-per-page setting
 - **Dark mode** — system-aware theme with a manual light/dark/system toggle
 - **Responsive** — works on desktop and mobile
-- **Demo mode** — built-in mock server for trying the app without a WordPress site
-
 
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 18 or later
-- A WordPress site with [Application Passwords](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/) enabled (WordPress 5.6+), or use demo mode
+- A WordPress site with [Application Passwords](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/) enabled (WordPress 5.6+)
 
 ## Setup
 
@@ -39,7 +37,6 @@ Edit `.env` to configure the app:
 | Variable | Default | Description |
 |---|---|---|
 | `VITE_WP_SITE_URL` | *(empty)* | WordPress site URL. When set, the login form hides the site address field. |
-| `VITE_MOCK_ENABLED` | `true` | Set to `true` to enable demo mode with a built-in mock server. |
 | `VITE_POSTS_PER_PAGE` | `10` | Fallback posts per page when WP settings endpoint is inaccessible. |
 | `VITE_MAX_IMAGE_BYTES` | `5242880` | Maximum featured image file size in bytes (5 MB). |
 | `VITE_ACCEPTED_IMAGE_TYPES` | `image/jpeg,image/png,image/gif,image/webp` | Comma-separated MIME types accepted for featured images. |
@@ -49,7 +46,7 @@ Edit `.env` to configure the app:
 | `VITE_POSTS_ORDER` | `desc` | Post list sort direction (`asc`, `desc`). |
 | `VITE_EXCERPT_PREVIEW_LENGTH` | `160` | Maximum characters shown in the post list excerpt preview. |
 
-To connect to a real WordPress site, set `VITE_MOCK_ENABLED=false` and optionally set `VITE_WP_SITE_URL` to your site's URL. All other variables are optional — the app works with sensible defaults when they are unset.
+Set `VITE_WP_SITE_URL` to your site's URL to pre-fill the login form. All other variables are optional — the app works with sensible defaults when they are unset.
 
 ## Running
 
@@ -109,7 +106,7 @@ src/
 ├── components/       # Shared UI components (TopBar, Footer, Banner, etc.)
 ├── editor/           # Block parser, serializer, and bridge for WordPress blocks
 ├── hooks/            # Custom hooks (usePosts, usePostCounts, useDebounce)
-├── mock/             # Mock server and seed data for demo mode
+
 ├── pages/            # Route-level page components
 ├── styles/           # Global styles and CSS custom property tokens
 ├── utils/            # Formatting helpers (dates, HTML sanitization, etc.)

@@ -1,5 +1,19 @@
+/**
+ * @file Login form validation rules.
+ *
+ * Validates username, password, and site URL fields. Site URL
+ * validation enforces HTTPS for non-local domains (WordPress
+ * requires HTTPS for Application Passwords on production sites).
+ */
+
 import { LIMITS, CONTROL_CHARS } from './constants';
 
+/**
+ * Validate login form values.
+ *
+ * @param {object} values - Form values (username, password, siteUrl, envSiteUrl).
+ * @returns {object} Error messages keyed by field name. Empty object if valid.
+ */
 export function validateLogin(values) {
   const errors = {};
 
@@ -15,7 +29,7 @@ export function validateLogin(values) {
     errors.password = 'Enter the Application Password for this user.';
   }
 
-  if (values.mode === 'live' && !values.envSiteUrl) {
+  if (!values.envSiteUrl) {
     let u = null;
     try {
       u = new URL(values.siteUrl);

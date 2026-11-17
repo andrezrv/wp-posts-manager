@@ -1,10 +1,12 @@
+/** @file Tests for login form validation rules. */
+
 import { describe, it, expect } from 'vitest';
 import { validateLogin } from '../loginRules';
 
 describe('validateLogin', () => {
-  const valid = { mode: 'mock', username: 'editor', password: 'abc123', siteUrl: '' };
+  const valid = { username: 'editor', password: 'abc123', siteUrl: 'https://example.com' };
 
-  it('passes with valid demo credentials', () => {
+  it('passes with valid credentials', () => {
     expect(validateLogin(valid)).toEqual({});
   });
 
@@ -28,54 +30,47 @@ describe('validateLogin', () => {
     expect(errors.password).toBeDefined();
   });
 
-  it('requires site URL in live mode', () => {
-    const errors = validateLogin({ ...valid, mode: 'live', siteUrl: '' });
+  it('requires site URL', () => {
+    const errors = validateLogin({ ...valid, siteUrl: '' });
     expect(errors.siteUrl).toBeDefined();
   });
 
-  it('rejects invalid URL in live mode', () => {
-    const errors = validateLogin({ ...valid, mode: 'live', siteUrl: 'not-a-url' });
+  it('rejects invalid URL', () => {
+    const errors = validateLogin({ ...valid, siteUrl: 'not-a-url' });
     expect(errors.siteUrl).toBeDefined();
   });
 
-  it('rejects HTTP for non-local sites in live mode', () => {
-    const errors = validateLogin({ ...valid, mode: 'live', siteUrl: 'http://example.com' });
+  it('rejects HTTP for non-local sites', () => {
+    const errors = validateLogin({ ...valid, siteUrl: 'http://example.com' });
     expect(errors.siteUrl).toMatch(/https/i);
   });
 
-  it('allows HTTP for localhost in live mode', () => {
-    const errors = validateLogin({ ...valid, mode: 'live', siteUrl: 'http://localhost' });
+  it('allows HTTP for localhost', () => {
+    const errors = validateLogin({ ...valid, siteUrl: 'http://localhost' });
     expect(errors.siteUrl).toBeUndefined();
   });
 
-  it('allows HTTP for .local domains in live mode', () => {
-    const errors = validateLogin({ ...valid, mode: 'live', siteUrl: 'http://mysite.local' });
+  it('allows HTTP for .local domains', () => {
+    const errors = validateLogin({ ...valid, siteUrl: 'http://mysite.local' });
     expect(errors.siteUrl).toBeUndefined();
   });
 
-  it('allows HTTP for .test domains in live mode', () => {
+  it('allows HTTP for .test domains', () => {
     const errors = validateLogin({
       ...valid,
-      mode: 'live',
       siteUrl: 'http://toptal-challenge.test',
     });
     expect(errors.siteUrl).toBeUndefined();
   });
 
-  it('allows HTTPS for any site in live mode', () => {
-    const errors = validateLogin({ ...valid, mode: 'live', siteUrl: 'https://example.com' });
-    expect(errors.siteUrl).toBeUndefined();
-  });
-
-  it('does not validate siteUrl in mock mode', () => {
-    const errors = validateLogin({ ...valid, mode: 'mock', siteUrl: '' });
+  it('allows HTTPS for any site', () => {
+    const errors = validateLogin({ ...valid, siteUrl: 'https://example.com' });
     expect(errors.siteUrl).toBeUndefined();
   });
 
   it('skips siteUrl validation when envSiteUrl is set', () => {
     const errors = validateLogin({
       ...valid,
-      mode: 'live',
       siteUrl: '',
       envSiteUrl: 'http://toptal-challenge.local',
     });

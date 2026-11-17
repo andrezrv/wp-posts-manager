@@ -1,6 +1,20 @@
+/**
+ * @file Post-login success screen.
+ *
+ * Shows a confirmation that the user has authenticated successfully,
+ * displaying their name, role, username, email, and connection mode.
+ * This page is a transient landing screen — users typically navigate
+ * to the post list immediately.
+ */
+
 import { useAuth } from '../auth/AuthContext';
 import styles from './DashboardPage.module.css';
 
+/**
+ * Displays authenticated user details after a successful login.
+ *
+ * @returns {JSX.Element}
+ */
 export default function DashboardPage() {
   const { session } = useAuth();
 
@@ -22,21 +36,16 @@ export default function DashboardPage() {
         </div>
         <h1>Login successful</h1>
         <p className={styles.detail}>
-          Authenticated as <strong>{session.user.name}</strong> ({session.user.roles?.[0] || 'user'})
+          Authenticated as <strong>{session.user.name}</strong> ({session.user.roles?.[0] || 'user'}
+          )
         </p>
         <dl className={styles.meta}>
           <dt>Username</dt>
           <dd>{session.user.username || session.user.slug}</dd>
           <dt>Email</dt>
           <dd>{session.user.email}</dd>
-          <dt>Mode</dt>
-          <dd>{session.mode === 'live' ? 'Live site' : 'Demo data'}</dd>
-          {session.mode === 'live' && (
-            <>
-              <dt>Site</dt>
-              <dd>{session.siteUrl}</dd>
-            </>
-          )}
+          <dt>Site</dt>
+          <dd>{session.siteUrl}</dd>
         </dl>
       </div>
     </div>

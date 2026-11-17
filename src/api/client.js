@@ -1,23 +1,56 @@
+/**
+ * @file HTTP client for the WordPress REST API.
+ *
+ * Provides a thin wrapper around `fetch` that handles authentication,
+ * JSON parsing, error mapping, and friendly error messages.
+ *
+ * Usage: call {@link configureClient} once at startup to set auth
+ * credentials and site URL, then use {@link apiFetch} for all API
+ * requests. The client detects 401 responses mid-session and triggers
+ * the session-expired callback to auto-logout.
+ */
+
 import { ApiError, friendlyMessage } from './errors';
 
+/** @type {string|null} Current Basic Auth header value. */
 let sessionAuth = null;
 let siteUrl = '';
-let useMock = false;
 let onSessionExpired = null;
-let mockHandler = null;
 
-export function configureClient({ auth, site, onExpired, mock, mode }) {
+/**
+ * Configure the API client. Can be called multiple times to update
+ * individual settings — only provided fields are changed.
+ *
+ * @param {object} opts
+ * @param {string} [opts.auth] - Basic Auth header value.
+ * @param {string} [opts.site] - WordPress site base URL.
+ * @param {Function} [opts.onExpired] - Callback when a 401 invalidates the session.
+ */
+export function configureClient({ auth, site, onExpired }) {
   if (auth !== undefined) sessionAuth = auth;
   if (site !== undefined) siteUrl = site;
   if (onExpired !== undefined) onSessionExpired = onExpired;
-  if (mock !== undefined) mockHandler = mock;
-  if (mode !== undefined) useMock = mode === 'mock';
 }
 
 export function getClientConfig() {
-  return { auth: sessionAuth, siteUrl, useMock };
+  return { auth: sessionAuth, siteUrl };
 }
 
+/**
+ * Make an authenticated request to the WordPress REST API.
+ *
+ * Throws {@link ApiError} on network failures and HTTP error responses.
+ *
+ * @param {string} method - HTTP method (GET, POST, DELETE, etc.).
+ * @param {string} path - API path relative to /wp-json (e.g. '/wp/v2/posts').
+ * @param {object} [opts] - Request options.
+ * @param {object} [opts.query] - URL query parameters.
+ * @param {*} [opts.body] - Request body (object for JSON, File/Blob for uploads).
+ * @param {object} [opts.headers] - Additional request headers.
+ * @param {string} [opts.auth] - Override auth header for this request.
+ * @returns {Promise<{status: number, headers: Headers, data: *}>}
+ * @throws {ApiError}
+ */
 export async function apiFetch(method, path, opts = {}) {
   const { query, body, headers = {}, auth } = opts;
 
@@ -36,11 +69,7 @@ export async function apiFetch(method, path, opts = {}) {
 
   let res;
   try {
-    if (useMock && mockHandler) {
-      res = await mockHandler(method, url, body, h);
-    } else {
-      res = await remoteFetch(method, siteUrl + url, body, h);
-    }
+    res = await remoteFetch(method, siteUrl + url, body, h);
   } catch (_e) {
     throw new ApiError(
       0,
@@ -52,7 +81,12 @@ export async function apiFetch(method, path, opts = {}) {
   if (res.status >= 400) {
     const d = res.data || {};
     const code = d.code || 'http_' + res.status;
-    const err = new ApiError(res.status, code, friendlyMessage(res.status, code, d.message), d.data);
+    const err = new ApiError(
+      res.status,
+      code,
+      friendlyMessage(res.status, code, d.message),
+      d.data,
+    );
 
     if (res.status === 401 && sessionAuth && !auth) {
       err.sessionEnded = true;
@@ -68,6 +102,7 @@ export async function apiFetch(method, path, opts = {}) {
   return res;
 }
 
+/** Perform a real HTTP fetch and parse the JSON response. */
 async function remoteFetch(method, url, body, headers) {
   const init = { method, headers: { Accept: 'application/json', ...headers } };
 

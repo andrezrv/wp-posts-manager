@@ -1,21 +1,36 @@
+/**
+ * @file Login page.
+ *
+ * Presents a form for authenticating with WordPress credentials
+ * (username + Application Password). The site URL field is shown
+ * unless `VITE_WP_SITE_URL` is set in the environment.
+ *
+ * Validates inputs client-side before submitting. On success,
+ * navigates to the post list. On failure, displays the API error
+ * and clears the password field.
+ */
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { validateLogin } from '../validation/loginRules';
-import { demoUser } from '../mock/seedData';
 import Banner from '../components/Banner';
 import FieldError from '../components/FieldError';
 import Spinner from '../components/Spinner';
 import styles from './LoginPage.module.css';
 
-const mockEnabled = import.meta.env.VITE_MOCK_ENABLED === 'true';
+/** Pre-configured site URL from environment, if any. */
 const envSiteUrl = import.meta.env.VITE_WP_SITE_URL || '';
 
+/**
+ * Login form with credential fields and client-side validation.
+ *
+ * @returns {JSX.Element}
+ */
 export default function LoginPage() {
   const { login, loginNotice, clearLoginNotice } = useAuth();
   const navigate = useNavigate();
 
-  const [mode, setMode] = useState(mockEnabled ? 'mock' : 'live');
   const [siteUrl, setSiteUrl] = useState(envSiteUrl);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -37,7 +52,7 @@ export default function LoginPage() {
     if (busy) return;
 
     setApiError('');
-    const values = { mode, siteUrl, username, password, envSiteUrl };
+    const values = { mode: 'live', siteUrl, username, password, envSiteUrl };
     const validationErrors = validateLogin(values);
 
     if (Object.keys(validationErrors).length) {
@@ -49,7 +64,7 @@ export default function LoginPage() {
     setBusy(true);
 
     try {
-      await login(mode, siteUrl, username, password);
+      await login(siteUrl, username, password);
       navigate('/posts', { replace: true });
     } catch (err) {
       setApiError(err.message);
@@ -63,17 +78,6 @@ export default function LoginPage() {
     if (e.key === 'Enter') handleSubmit();
   };
 
-  const fillDemo = () => {
-    setUsername(demoUser.username);
-    setPassword(demoUser.appPassword);
-    setErrors({});
-    setApiError('');
-  };
-
-  const isLive = mode === 'live';
-  const showModeToggle = mockEnabled || !envSiteUrl;
-  const showSiteUrlField = isLive && !envSiteUrl;
-
   return (
     <div className={styles.wrap}>
       <div className={styles.login}>
@@ -84,43 +88,17 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {loginNotice && <Banner kind="warning" message={loginNotice} onDismiss={clearLoginNotice} />}
+        {loginNotice && (
+          <Banner kind="warning" message={loginNotice} onDismiss={clearLoginNotice} />
+        )}
 
         <div className={styles.card}>
-          {showModeToggle && (
-            <fieldset className={styles.fieldset}>
-              <legend className={styles.legend}>Connect to</legend>
-              <div className={styles.seg}>
-                <input
-                  type="radio"
-                  name="mode"
-                  id="mode-mock"
-                  value="mock"
-                  checked={!isLive}
-                  onChange={() => setMode('mock')}
-                />
-                <label htmlFor="mode-mock">Demo site</label>
-                <input
-                  type="radio"
-                  name="mode"
-                  id="mode-live"
-                  value="live"
-                  checked={isLive}
-                  onChange={() => setMode('live')}
-                />
-                <label htmlFor="mode-live">My WordPress site</label>
-              </div>
-            </fieldset>
-          )}
-
-          {isLive && envSiteUrl && (
+          {envSiteUrl ? (
             <div className={styles.siteIndicator}>
               <span className={styles.siteIndicatorLabel}>Connecting to</span>
               <span className={styles.siteIndicatorUrl}>{envSiteUrl}</span>
             </div>
-          )}
-
-          {showSiteUrlField && (
+          ) : (
             <div className={styles.field}>
               <label htmlFor="f-siteUrl">Site address</label>
               <input
@@ -201,31 +179,11 @@ export default function LoginPage() {
 
           {apiError && <Banner message={apiError} onDismiss={() => setApiError('')} />}
 
-          <button
-            type="button"
-            className={styles.submitBtn}
-            onClick={handleSubmit}
-            disabled={busy}
-          >
+          <button type="button" className={styles.submitBtn} onClick={handleSubmit} disabled={busy}>
             {busy && <Spinner />}
             {busy ? 'Logging in…' : 'Log in'}
           </button>
         </div>
-
-        {!isLive && (
-          <div className={styles.demoCard}>
-            <strong>Demo account</strong>
-            <dl className={styles.demoDl}>
-              <dt>Username</dt>
-              <dd>{demoUser.username}</dd>
-              <dt>App password</dt>
-              <dd>{demoUser.appPassword}</dd>
-            </dl>
-            <button type="button" className={styles.demoBtn} onClick={fillDemo}>
-              Fill in demo credentials
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,7 +1,23 @@
+/**
+ * @file Application header bar.
+ *
+ * Displays the brand name and site indicator, the authenticated user's
+ * avatar and name, a theme toggle (cycles system → light → dark),
+ * and an external link to the WordPress admin dashboard.
+ *
+ * When no session is active (login page), only the brand and theme
+ * toggle are shown.
+ *
+ * Theme preference is persisted to localStorage and applied via a
+ * `data-theme` attribute on the document root, which the CSS tokens
+ * in `tokens.css` respond to.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import styles from './TopBar.module.css';
 
+/** Read the saved theme preference from localStorage. */
 function getInitialTheme() {
   try {
     const stored = localStorage.getItem('theme');
@@ -10,6 +26,7 @@ function getInitialTheme() {
   return 'system';
 }
 
+/** Set or remove the `data-theme` attribute on the document root. */
 function applyTheme(theme) {
   if (theme === 'system') {
     document.documentElement.removeAttribute('data-theme');
@@ -18,6 +35,7 @@ function applyTheme(theme) {
   }
 }
 
+/** Maps each theme to the next one in the cycle. */
 const THEME_CYCLE = { system: 'light', light: 'dark', dark: 'system' };
 
 const THEME_ICONS = {
@@ -30,12 +48,22 @@ const THEME_ICONS = {
   light: (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <circle cx="8" cy="8" r="3" stroke="currentColor" strokeWidth="1.3" />
-      <path d="M8 2.5v-1M8 14.5v-1M13.5 8h1M1.5 8h1M11.89 4.11l.7-.7M3.41 12.59l.7-.7M11.89 11.89l.7.7M3.41 3.41l.7.7" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+      <path
+        d="M8 2.5v-1M8 14.5v-1M13.5 8h1M1.5 8h1M11.89 4.11l.7-.7M3.41 12.59l.7-.7M11.89 11.89l.7.7M3.41 3.41l.7.7"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+      />
     </svg>
   ),
   dark: (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M13.5 9.5a5.5 5.5 0 01-7-7 5.5 5.5 0 107 7z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+      <path
+        d="M13.5 9.5a5.5 5.5 0 01-7-7 5.5 5.5 0 107 7z"
+        stroke="currentColor"
+        strokeWidth="1.3"
+        strokeLinejoin="round"
+      />
     </svg>
   ),
 };
@@ -56,7 +84,9 @@ export default function TopBar() {
 
   useEffect(() => {
     applyTheme(theme);
-    try { localStorage.setItem('theme', theme); } catch (_) {}
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (_) {}
   }, [theme]);
 
   const cycleTheme = useCallback(() => {
@@ -73,10 +103,9 @@ export default function TopBar() {
         .toUpperCase()
     : '';
 
-  const role =
-    session?.user.roles?.[0]
-      ? session.user.roles[0][0].toUpperCase() + session.user.roles[0].slice(1)
-      : '';
+  const role = session?.user.roles?.[0]
+    ? session.user.roles[0][0].toUpperCase() + session.user.roles[0].slice(1)
+    : '';
 
   return (
     <header className={styles.topbar}>
@@ -85,7 +114,9 @@ export default function TopBar() {
           <span className={styles.mark}>{ICON_MARK}</span>
           <span className={styles.brandName}>
             Posts Manager
-            {session && <span className={styles.brandSite}>{session.mode === 'live' ? new URL(session.siteUrl).hostname : 'Demo site'}</span>}
+            {session && (
+              <span className={styles.brandSite}>{new URL(session.siteUrl).hostname}</span>
+            )}
           </span>
         </a>
         <span className={styles.spacer} />
@@ -118,7 +149,13 @@ export default function TopBar() {
               title="Open WordPress admin"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path d="M6 3.5H3.5a1 1 0 00-1 1V12.5a1 1 0 001 1H11.5a1 1 0 001-1V10M9.5 2.5h4m0 0v4m0-4l-6 6" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M6 3.5H3.5a1 1 0 00-1 1V12.5a1 1 0 001 1H11.5a1 1 0 001-1V10M9.5 2.5h4m0 0v4m0-4l-6 6"
+                  stroke="currentColor"
+                  strokeWidth="1.3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </a>
           </div>
