@@ -1,7 +1,34 @@
+/**
+ * @file Modal confirmation dialog.
+ *
+ * Used for destructive actions like deleting posts. Traps keyboard
+ * focus within the dialog, closes on Escape, and closes on backdrop
+ * click. Initial focus lands on the Cancel button to prevent
+ * accidental confirmation.
+ *
+ * Supports a "busy" state that disables both buttons and shows a
+ * spinner on the confirm button while an async action is in progress.
+ */
+
 import { useEffect, useRef } from 'react';
 import Spinner from './Spinner';
 import styles from './ConfirmDialog.module.css';
 
+/**
+ * Modal dialog with confirm and cancel actions.
+ *
+ * @param {object} props
+ * @param {boolean} props.open - Whether the dialog is visible.
+ * @param {string} props.title - Dialog heading.
+ * @param {React.ReactNode} props.children - Body content.
+ * @param {string} [props.confirmLabel='Confirm'] - Confirm button text.
+ * @param {string} [props.cancelLabel='Cancel'] - Cancel button text.
+ * @param {boolean} [props.danger=false] - Applies danger styling to confirm button.
+ * @param {boolean} [props.busy=false] - Disables buttons and shows spinner.
+ * @param {Function} props.onConfirm - Called when the confirm button is clicked.
+ * @param {Function} props.onCancel - Called when cancel, Escape, or backdrop is clicked.
+ * @returns {JSX.Element|null}
+ */
 export default function ConfirmDialog({
   open,
   title,

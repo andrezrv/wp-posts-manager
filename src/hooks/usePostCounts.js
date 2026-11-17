@@ -1,6 +1,19 @@
+/**
+ * @file Hook for fetching post counts per status.
+ *
+ * Provides the counts displayed as badges on the status filter tabs.
+ * Counts are supplementary — fetch failures are silently ignored
+ * to avoid blocking the UI.
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getPostCounts } from '../api/endpoints';
 
+/**
+ * Fetch post counts per status for the tab badges.
+ *
+ * @returns {{ counts: object|null, refetchCounts: Function }}
+ */
 export default function usePostCounts() {
   const [counts, setCounts] = useState(null);
   const tokenRef = useRef(0);

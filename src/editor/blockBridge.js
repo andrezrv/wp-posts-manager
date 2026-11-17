@@ -1,7 +1,26 @@
+/**
+ * @file Bridge between WordPress blocks and TipTap visual editing.
+ *
+ * Converts WordPress block markup into TipTap-editable HTML and back,
+ * preserving block comment delimiters through round-trips. This is what
+ * prevents blocks from degrading to "Classic" in the WordPress editor.
+ *
+ * The bridge maintains a registry mapping `data-wp-key` attributes to
+ * original block metadata. Untouched blocks round-trip byte-for-byte;
+ * edited blocks are re-serialized with correct `<!-- wp:... -->` comments.
+ *
+ * Supported blocks (editable): paragraph, heading, list, quote, preformatted.
+ * Unsupported blocks render as locked read-only previews.
+ *
+ * @see {@link ./blockParser.js} for parsing block comments.
+ * @see {@link ./blockSerializer.js} for serializing back to block format.
+ */
+
 import { hasBlocks, parseBlocks } from './blockParser';
 import { cleanOuter, serializeNode } from './blockSerializer';
 import { esc } from '../utils/format';
 
+/** Block types that map to a single HTML element and can be edited directly. */
 const SIMPLE_BLOCKS = {
   'core/paragraph': /^P$/,
   'core/heading': /^H[1-6]$/,
@@ -36,6 +55,11 @@ const blockLabel = (name) => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
+/**
+ * Create a new block bridge instance with its own registry.
+ *
+ * @returns {{ toVisual: Function, snapshotClean: Function, toRaw: Function, registry: Map, hasBlocks: Function }}
+ */
 export function createBlockBridge() {
   const registry = new Map();
   let blockOrder = [];
@@ -70,10 +94,7 @@ export function createBlockBridge() {
         if (
           el &&
           el.tagName === 'BLOCKQUOTE' &&
-          everyDescendant(
-            item,
-            (c) => c.name === 'core/paragraph' && attrsLimitedTo(c, []),
-          )
+          everyDescendant(item, (c) => c.name === 'core/paragraph' && attrsLimitedTo(c, []))
         )
           kind = 'quote';
       }
@@ -100,8 +121,7 @@ export function createBlockBridge() {
     registry.set(key, { kind: 'locked', raw: item.raw });
     blockOrder.push({ key, locked: true });
 
-    const label =
-      item.type === 'freeform' ? 'Classic content' : blockLabel(item.name) + ' block';
+    const label = item.type === 'freeform' ? 'Classic content' : blockLabel(item.name) + ' block';
     return `<div data-wp-locked="${key}" data-wp-label="${esc(label)}" data-wp-preview="${esc(innerHtml)}"></div>`;
   }
 

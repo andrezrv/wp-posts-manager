@@ -1,3 +1,13 @@
+/**
+ * @file Shared constants and env-configurable settings.
+ *
+ * Central location for all values that may vary per deployment.
+ * Each setting reads from a `VITE_*` environment variable with a
+ * sensible fallback default. When no `.env` file is present, the
+ * app behaves identically to the hardcoded defaults.
+ */
+
+/** Map of WordPress post status keys to display labels. */
 export const STATUSES = {
   publish: 'Published',
   future: 'Scheduled',

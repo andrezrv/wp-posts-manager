@@ -1,3 +1,16 @@
+/**
+ * @file Block serializer — converts TipTap DOM back to WordPress block markup.
+ *
+ * Walks the editor's DOM tree and wraps each element in the appropriate
+ * `<!-- wp:name -->` comment delimiters. For blocks that haven't changed
+ * (detected by comparing against the clean snapshot), the original raw
+ * markup is returned byte-for-byte.
+ *
+ * Handles paragraphs, headings, lists (with nested sub-lists), quotes
+ * (with nested paragraphs), preformatted text, horizontal rules, and
+ * falls back to `wp:html` for unrecognized elements.
+ */
+
 import { esc } from '../utils/format';
 
 const escAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
@@ -146,11 +159,7 @@ export function serializeNode(el, seen) {
   if (tag === 'UL' || tag === 'OL') return serializeList(el, null);
   if (tag === 'BLOCKQUOTE') return serializeQuote(el, null, seen);
   if (tag === 'HR')
-    return wrapBlock(
-      'separator',
-      '',
-      '<hr class="wp-block-separator has-alpha-channel-opacity"/>',
-    );
+    return wrapBlock('separator', '', '<hr class="wp-block-separator has-alpha-channel-opacity"/>');
   return wrapBlock('html', '', cleanOuter(el));
 }
 
@@ -161,8 +170,7 @@ export function serializeVisual(root, registry) {
   let inline = '';
 
   const flush = () => {
-    if (hasContent(inline))
-      parts.push(wrapBlock('paragraph', '', `<p>${inline.trim()}</p>`));
+    if (hasContent(inline)) parts.push(wrapBlock('paragraph', '', `<p>${inline.trim()}</p>`));
     inline = '';
   };
 

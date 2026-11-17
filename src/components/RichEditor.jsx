@@ -1,3 +1,26 @@
+/**
+ * @file Rich text editor with WordPress block preservation.
+ *
+ * Integrates TipTap as a WYSIWYG editor while preserving WordPress
+ * Gutenberg block markup (`<!-- wp:name -->` comment delimiters)
+ * through editing round-trips. Without this, blocks degrade to
+ * "Classic" blocks when reopened in the WordPress editor.
+ *
+ * The editor operates in two modes:
+ * - **Visual** — TipTap WYSIWYG editing with a formatting toolbar.
+ * - **HTML** — raw HTML textarea for direct markup editing.
+ *
+ * Switching between modes re-parses content through the block bridge,
+ * which maps between WordPress block format and TipTap-editable HTML.
+ *
+ * The parent component accesses the current content via a ref:
+ * `editorRef.current.getContent()` returns the serialized HTML with
+ * block comments restored.
+ *
+ * @see {@link ../editor/blockBridge.js} for the block bridge logic.
+ * @see {@link ../editor/blockParser.js} for the WordPress block parser.
+ */
+
 import { useState, useCallback, useRef, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -7,6 +30,7 @@ import { createBlockBridge } from '../editor/blockBridge';
 import { LockedBlock } from '../editor/lockedBlockNode';
 import styles from './RichEditor.module.css';
 
+/** TipTap extensions: starter kit, links, placeholder, and locked blocks. */
 const extensions = [
   StarterKit.configure({
     heading: { levels: [2, 3, 4] },
@@ -21,6 +45,7 @@ const extensions = [
   LockedBlock,
 ];
 
+/** Individual toolbar button with active/pressed state. */
 function ToolbarButton({ active, onClick, title, children }) {
   return (
     <button
@@ -38,6 +63,7 @@ function ToolbarButton({ active, onClick, title, children }) {
   );
 }
 
+/** Formatting toolbar: bold, italic, headings, lists, links, code. */
 function Toolbar({ editor }) {
   if (!editor) return null;
 
@@ -126,11 +152,7 @@ function Toolbar({ editor }) {
       <span className={styles.tbSep} />
 
       <div className={styles.tbGroup}>
-        <ToolbarButton
-          active={editor.isActive('link')}
-          onClick={addLink}
-          title="Link"
-        >
+        <ToolbarButton active={editor.isActive('link')} onClick={addLink} title="Link">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path
               d="M6.5 9.5a3.5 3.5 0 005 0l2-2a3.5 3.5 0 00-5-5l-1 1M9.5 6.5a3.5 3.5 0 00-5 0l-2 2a3.5 3.5 0 005 5l1-1"
@@ -152,6 +174,15 @@ function Toolbar({ editor }) {
   );
 }
 
+/**
+ * Rich text editor component with visual and HTML modes.
+ *
+ * @param {object} props
+ * @param {string} props.value - Initial HTML content (may contain WordPress block markup).
+ * @param {Function} props.onChange - Called with the updated HTML on each edit.
+ * @param {boolean} [props.invalid] - Applies error styling when true.
+ * @param {React.Ref} ref - Exposes `{ getContent() }` to the parent.
+ */
 const RichEditor = forwardRef(function RichEditor({ value, onChange, invalid }, ref) {
   const [mode, setMode] = useState('visual');
   const [htmlDraft, setHtmlDraft] = useState('');

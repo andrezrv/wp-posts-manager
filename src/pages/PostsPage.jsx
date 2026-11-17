@@ -1,3 +1,23 @@
+/**
+ * @file Post list page.
+ *
+ * Displays all posts in a table with status filtering, full-text search,
+ * and server-side pagination. This is the main screen after login.
+ *
+ * Key design decisions:
+ * - **URL-driven state** — status filter, page number, and search query
+ *   are stored in URL search params (`?status=draft&page=2&q=hello`),
+ *   making filter states shareable and back-button friendly.
+ * - **Link-based tabs** — status filters are `<Link>` elements (not
+ *   buttons) so they support right-click and open-in-new-tab.
+ * - **Debounced search** — the search input syncs to URL params after
+ *   a delay to avoid excessive API calls while typing.
+ * - **Skeleton loading** — shows placeholder rows during data fetches
+ *   to prevent layout shift.
+ * - **Delete flow** — confirmation dialog with an option for permanent
+ *   deletion. Trashed posts show a Restore button.
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -11,6 +31,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import Banner from '../components/Banner';
 import styles from './PostsPage.module.css';
 
+/** Tab definitions: [statusKey, displayLabel] pairs. */
 const STATUS_TABS = [
   ['any', 'All'],
   ['publish', 'Published'],
@@ -21,8 +42,10 @@ const STATUS_TABS = [
   ['trash', 'Trash'],
 ];
 
+/** Set of valid status keys for URL param validation. */
 const VALID_STATUSES = new Set(STATUS_TABS.map(([k]) => k));
 
+/** Extract the thumbnail URL from a post's embedded featured media. */
 function getThumb(post) {
   const embedded = post._embedded?.['wp:featuredmedia']?.[0];
   if (!embedded) return null;
@@ -32,17 +55,24 @@ function getThumb(post) {
   );
 }
 
+/** Returns the appropriate date column label based on post status. */
 function dateLabel(status) {
   if (status === 'future') return 'Goes live';
   if (status === 'publish' || status === 'private') return 'Published';
   return 'Last modified';
 }
 
+/** Returns the relevant date for a post (modified for drafts, published for others). */
 function dateValue(post) {
   if (post.status === 'draft' || post.status === 'pending') return post.modified;
   return post.date;
 }
 
+/**
+ * Post list with filtering, search, pagination, and delete actions.
+ *
+ * @returns {JSX.Element}
+ */
 export default function PostsPage() {
   const { session } = useAuth();
   const location = useLocation();
@@ -61,13 +91,16 @@ export default function PostsPage() {
 
   useEffect(() => {
     if (debouncedSearch === urlSearch) return;
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      if (debouncedSearch) next.set('q', debouncedSearch);
-      else next.delete('q');
-      next.delete('page');
-      return next;
-    }, { replace: true });
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (debouncedSearch) next.set('q', debouncedSearch);
+        else next.delete('q');
+        next.delete('page');
+        return next;
+      },
+      { replace: true },
+    );
   }, [debouncedSearch, urlSearch, setSearchParams]);
 
   const { posts, total, totalPages, loading, error, refetch, deletePost, restorePost } = usePosts({
@@ -121,18 +154,21 @@ export default function PostsPage() {
   const [trashWarningDismissed, setTrashWarningDismissed] = useState(false);
   const [restoringId, setRestoringId] = useState(null);
 
-  const handleRestore = useCallback(async (post) => {
-    setRestoringId(post.id);
-    try {
-      await restorePost(post.id);
-      refetch();
-      refetchCounts();
-    } catch (_) {
-      // restore failure is visible as the post staying in the list
-    } finally {
-      setRestoringId(null);
-    }
-  }, [restorePost, refetch, refetchCounts]);
+  const handleRestore = useCallback(
+    async (post) => {
+      setRestoringId(post.id);
+      try {
+        await restorePost(post.id);
+        refetch();
+        refetchCounts();
+      } catch (_) {
+        // restore failure is visible as the post staying in the list
+      } finally {
+        setRestoringId(null);
+      }
+    },
+    [restorePost, refetch, refetchCounts],
+  );
 
   const from = (page - 1) * perPage + 1;
   const to = Math.min(page * perPage, total);
@@ -144,8 +180,12 @@ export default function PostsPage() {
           <h1>Posts</h1>
           <p className={styles.sub}>
             {!loading && total > 0 ? (
-              <span className={styles.fadeIn}>{total} {total === 1 ? 'post' : 'posts'}</span>
-            ) : ' '}
+              <span className={styles.fadeIn}>
+                {total} {total === 1 ? 'post' : 'posts'}
+              </span>
+            ) : (
+              ' '
+            )}
           </p>
         </div>
         <Link to="/posts/new" className={styles.newBtn}>
@@ -154,7 +194,11 @@ export default function PostsPage() {
       </div>
 
       {location.state?.trashWarning && !trashWarningDismissed && (
-        <Banner kind="warning" message="That post is in the Trash. Restore it first to edit it." onDismiss={() => setTrashWarningDismissed(true)} />
+        <Banner
+          kind="warning"
+          message="That post is in the Trash. Restore it first to edit it."
+          onDismiss={() => setTrashWarningDismissed(true)}
+        />
       )}
 
       <div className={styles.card}>
@@ -182,7 +226,12 @@ export default function PostsPage() {
           <div className={styles.search}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
               <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M11 11l3.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              <path
+                d="M11 11l3.5 3.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
             </svg>
             <input
               type="search"
@@ -218,12 +267,15 @@ export default function PostsPage() {
                       className={styles.linkBtn}
                       onClick={() => {
                         setSearch('');
-                        setSearchParams((prev) => {
-                          const next = new URLSearchParams(prev);
-                          next.delete('q');
-                          next.delete('page');
-                          return next;
-                        }, { replace: true });
+                        setSearchParams(
+                          (prev) => {
+                            const next = new URLSearchParams(prev);
+                            next.delete('q');
+                            next.delete('page');
+                            return next;
+                          },
+                          { replace: true },
+                        );
                       }}
                     >
                       Clear search
@@ -284,12 +336,7 @@ export default function PostsPage() {
                             <tr key={post.id} className={styles.fadeIn}>
                               <td className={styles.cThumb}>
                                 {thumb ? (
-                                  <img
-                                    className={styles.thumb}
-                                    src={thumb}
-                                    alt=""
-                                    loading="lazy"
-                                  />
+                                  <img className={styles.thumb} src={thumb} alt="" loading="lazy" />
                                 ) : (
                                   <span className={styles.thumbEmpty} />
                                 )}
@@ -298,10 +345,7 @@ export default function PostsPage() {
                                 {isTrashed ? (
                                   <span className={styles.postTitle}>{title}</span>
                                 ) : (
-                                  <Link
-                                    to={`/posts/${post.id}/edit`}
-                                    className={styles.postTitle}
-                                  >
+                                  <Link to={`/posts/${post.id}/edit`} className={styles.postTitle}>
                                     {title}
                                   </Link>
                                 )}
@@ -318,9 +362,7 @@ export default function PostsPage() {
                               </td>
                               <td className={styles.cDate}>
                                 <time>{fmtDate(dateValue(post))}</time>
-                                <span className={styles.dateKind}>
-                                  {dateLabel(post.status)}
-                                </span>
+                                <span className={styles.dateKind}>{dateLabel(post.status)}</span>
                               </td>
                               <td className={styles.cActions}>
                                 {isTrashed ? (
@@ -333,10 +375,7 @@ export default function PostsPage() {
                                     {restoringId === post.id ? 'Restoring…' : 'Restore'}
                                   </button>
                                 ) : (
-                                  <Link
-                                    to={`/posts/${post.id}/edit`}
-                                    className={styles.actionBtn}
-                                  >
+                                  <Link to={`/posts/${post.id}/edit`} className={styles.actionBtn}>
                                     Edit
                                   </Link>
                                 )}
@@ -375,13 +414,15 @@ export default function PostsPage() {
                         type="button"
                         className={styles.pageBtn}
                         disabled={page <= 1}
-                        onClick={() => setSearchParams((prev) => {
-                          const next = new URLSearchParams(prev);
-                          const p = page - 1;
-                          if (p <= 1) next.delete('page');
-                          else next.set('page', String(p));
-                          return next;
-                        })}
+                        onClick={() =>
+                          setSearchParams((prev) => {
+                            const next = new URLSearchParams(prev);
+                            const p = page - 1;
+                            if (p <= 1) next.delete('page');
+                            else next.set('page', String(p));
+                            return next;
+                          })
+                        }
                       >
                         Previous
                       </button>
@@ -392,11 +433,13 @@ export default function PostsPage() {
                         type="button"
                         className={styles.pageBtn}
                         disabled={page >= totalPages}
-                        onClick={() => setSearchParams((prev) => {
-                          const next = new URLSearchParams(prev);
-                          next.set('page', String(page + 1));
-                          return next;
-                        })}
+                        onClick={() =>
+                          setSearchParams((prev) => {
+                            const next = new URLSearchParams(prev);
+                            next.set('page', String(page + 1));
+                            return next;
+                          })
+                        }
                       >
                         Next
                       </button>
@@ -414,7 +457,13 @@ export default function PostsPage() {
       <ConfirmDialog
         open={!!deleting}
         title="Delete post"
-        confirmLabel={deleting?.status === 'trash' ? 'Delete permanently' : permanent ? 'Delete permanently' : 'Move to Trash'}
+        confirmLabel={
+          deleting?.status === 'trash'
+            ? 'Delete permanently'
+            : permanent
+              ? 'Delete permanently'
+              : 'Move to Trash'
+        }
         danger
         busy={deleteBusy}
         onConfirm={handleDelete}
@@ -423,9 +472,18 @@ export default function PostsPage() {
         {deleting && (
           <>
             <p>
-              {deleting.status === 'trash'
-                ? <>This will permanently delete <strong>{deleting.title?.raw || '(no title)'}</strong> and all its data. This can't be undone.</>
-                : <>Are you sure you want to delete <strong>{deleting.title?.raw || '(no title)'}</strong>?</>}
+              {deleting.status === 'trash' ? (
+                <>
+                  This will permanently delete{' '}
+                  <strong>{deleting.title?.raw || '(no title)'}</strong> and all its data. This
+                  can't be undone.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to delete{' '}
+                  <strong>{deleting.title?.raw || '(no title)'}</strong>?
+                </>
+              )}
             </p>
             {deleting.status !== 'trash' && (
               <label className={styles.checkLabel}>
@@ -444,4 +502,3 @@ export default function PostsPage() {
     </div>
   );
 }
-

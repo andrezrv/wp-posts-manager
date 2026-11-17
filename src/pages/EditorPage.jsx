@@ -1,7 +1,31 @@
+/**
+ * @file Post editor page (create and edit).
+ *
+ * Handles both creating new posts and editing existing ones, determined
+ * by the presence of an `:id` route parameter. Fields include title,
+ * rich text content, excerpt, status, publish date, and featured image.
+ *
+ * Key behaviors:
+ * - **Image upload** — validates file type and size against env-configurable
+ *   limits, uploads to the WP media endpoint, then attaches the media ID.
+ * - **Trashed posts** — redirects back to the post list with a warning
+ *   instead of allowing edits.
+ * - **Client-side validation** — via `postRules.js` before submission,
+ *   with per-field inline error display.
+ * - **Rich editor** — uses the block-preserving TipTap editor from
+ *   {@link ../components/RichEditor.jsx}.
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { getPost, createPost, updatePost, deletePost as apiDeletePost, uploadMedia } from '../api/endpoints';
+import {
+  getPost,
+  createPost,
+  updatePost,
+  deletePost as apiDeletePost,
+  uploadMedia,
+} from '../api/endpoints';
 import { STATUSES, IMAGE_TYPES, DEFAULT_POST_STATUS } from '../validation/constants';
 import { validatePost } from '../validation/postRules';
 import { toLocalInput, toWpDate, safeImgSrc, formatBytes } from '../utils/format';
@@ -12,21 +36,32 @@ import RichEditor from '../components/RichEditor';
 import Spinner from '../components/Spinner';
 import styles from './EditorPage.module.css';
 
+/** Status options for the dropdown, excluding "trash". */
 const STATUS_OPTIONS = Object.entries(STATUSES).filter(([k]) => k !== 'trash');
 
+/** Extract the medium-size thumbnail URL from a post's embedded media. */
 function getThumbUrl(post) {
   const m = post?._embedded?.['wp:featuredmedia']?.[0];
   if (!m) return '';
   return safeImgSrc(m.media_details?.sizes?.medium?.source_url) || safeImgSrc(m.source_url) || '';
 }
 
+/**
+ * Post editor for creating and editing posts.
+ *
+ * Uses the `:id` route param to determine mode: absent = new post,
+ * present = edit existing. Fetches the post on mount when editing.
+ *
+ * @returns {JSX.Element}
+ */
 export default function EditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const { session } = useAuth();
   const isNew = !id;
-  const wpEditUrl = !isNew && session?.siteUrl ? `${session.siteUrl}/wp-admin/post.php?post=${id}&action=edit` : '';
+  const wpEditUrl =
+    !isNew && session?.siteUrl ? `${session.siteUrl}/wp-admin/post.php?post=${id}&action=edit` : '';
 
   const [loading, setLoading] = useState(!isNew);
   const [loadError, setLoadError] = useState('');
@@ -176,7 +211,20 @@ export default function EditorPage() {
     } finally {
       setSaving(false);
     }
-  }, [saving, title, content, excerpt, status, date, imageFile, featuredMediaId, isNew, id, navigate, imagePreview]);
+  }, [
+    saving,
+    title,
+    content,
+    excerpt,
+    status,
+    date,
+    imageFile,
+    featuredMediaId,
+    isNew,
+    id,
+    navigate,
+    imagePreview,
+  ]);
 
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -240,7 +288,13 @@ export default function EditorPage() {
             <a href={wpEditUrl} target="_blank" rel="noopener noreferrer" className={styles.wpLink}>
               Open in WordPress
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                <path d="M4.5 1.5H2a.5.5 0 00-.5.5v8a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V7.5M7 1.5h3.5V5M6 6l4.5-4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M4.5 1.5H2a.5.5 0 00-.5.5v8a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V7.5M7 1.5h3.5V5M6 6l4.5-4.5"
+                  stroke="currentColor"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </a>
           )}
@@ -248,7 +302,9 @@ export default function EditorPage() {
       </div>
 
       {apiError && <Banner message={apiError} onDismiss={() => setApiError('')} />}
-      {saved && <Banner kind="ok" message={location.state?.created ? 'Post created.' : 'Post saved.'} />}
+      {saved && (
+        <Banner kind="ok" message={location.state?.created ? 'Post created.' : 'Post saved.'} />
+      )}
 
       <div className={styles.grid}>
         <div className={styles.main}>
@@ -346,12 +402,7 @@ export default function EditorPage() {
               <p className={styles.hint}>Leave empty to publish immediately.</p>
             </div>
 
-            <button
-              type="button"
-              className={styles.saveBtn}
-              onClick={handleSave}
-              disabled={saving}
-            >
+            <button type="button" className={styles.saveBtn} onClick={handleSave} disabled={saving}>
               {saving && <Spinner />}
               {saving ? 'Saving…' : isNew ? 'Create post' : 'Update post'}
             </button>
@@ -363,23 +414,13 @@ export default function EditorPage() {
             {thumbSrc ? (
               <div className={styles.imagePreview}>
                 <img src={thumbSrc} alt="" />
-                <button
-                  type="button"
-                  className={styles.removeImage}
-                  onClick={removeImage}
-                >
+                <button type="button" className={styles.removeImage} onClick={removeImage}>
                   Remove
                 </button>
               </div>
             ) : (
               <label className={styles.imageUpload} htmlFor="f-image">
-                <svg
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect
                     x="3"
                     y="3"

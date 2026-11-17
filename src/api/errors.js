@@ -1,5 +1,23 @@
+/**
+ * @file API error types and user-friendly error messages.
+ *
+ * Maps WordPress REST API error codes to plain-language messages
+ * that help users understand what went wrong and how to fix it.
+ * Falls back to generic messages based on HTTP status when no
+ * specific mapping exists.
+ */
+
 import { plainText } from '../utils/format';
 
+/**
+ * Custom error class for API responses with HTTP error status codes.
+ *
+ * @extends Error
+ * @property {number} status - HTTP status code.
+ * @property {string} code - WordPress error code (e.g. 'rest_forbidden').
+ * @property {object} data - Additional error data from the API.
+ * @property {boolean} [sessionEnded] - True when a 401 invalidated the session.
+ */
 export class ApiError extends Error {
   constructor(status, code, message, data) {
     super(message);
@@ -37,6 +55,14 @@ const MESSAGE_MAP = {
     "This site doesn't expose the WordPress REST API at /wp-json. Check the address or the site's permalink settings.",
 };
 
+/**
+ * Map an API error to a user-friendly message.
+ *
+ * @param {number} status - HTTP status code.
+ * @param {string} code - WordPress error code.
+ * @param {string} [serverMsg] - Raw message from the server.
+ * @returns {string} A plain-language error message.
+ */
 export function friendlyMessage(status, code, serverMsg) {
   if (MESSAGE_MAP[code]) return MESSAGE_MAP[code];
   if (status === 401) return BAD_CREDENTIALS;
@@ -48,5 +74,7 @@ export function friendlyMessage(status, code, serverMsg) {
       status +
       "). Wait a moment and try again. If it keeps happening, check the site's error log."
     );
-  return serverMsg ? plainText(serverMsg) : 'Something went wrong (HTTP ' + status + '). Try again.';
+  return serverMsg
+    ? plainText(serverMsg)
+    : 'Something went wrong (HTTP ' + status + '). Try again.';
 }

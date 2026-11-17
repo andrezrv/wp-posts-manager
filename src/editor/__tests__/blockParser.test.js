@@ -1,3 +1,5 @@
+/** @file Tests for WordPress block comment parser. */
+
 import { describe, it, expect } from 'vitest';
 import { hasBlocks, parseBlocks } from '../blockParser';
 

@@ -1,3 +1,5 @@
+/** @file Tests for ApiError class and friendlyMessage mapping. */
+
 import { describe, it, expect } from 'vitest';
 import { ApiError, friendlyMessage } from '../errors';
 

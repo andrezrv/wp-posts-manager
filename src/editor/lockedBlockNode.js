@@ -1,5 +1,19 @@
+/**
+ * @file Custom TipTap node for locked (unsupported) WordPress blocks.
+ *
+ * Renders unsupported block types as read-only previews within the
+ * editor. These blocks display a lock icon, the block type label,
+ * and a preview of the block's HTML content. They cannot be edited
+ * visually — their original raw markup is preserved byte-for-byte
+ * through the block bridge.
+ */
+
 import { Node } from '@tiptap/react';
 
+/**
+ * TipTap node extension for locked WordPress blocks.
+ * Atomic, selectable, non-editable. Parsed from `div[data-wp-locked]`.
+ */
 export const LockedBlock = Node.create({
   name: 'lockedBlock',
   group: 'block',

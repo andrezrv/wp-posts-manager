@@ -1,10 +1,24 @@
+/**
+ * @file WordPress Gutenberg block parser.
+ *
+ * Parses raw post content into a block tree following WordPress's
+ * comment-delimited format (`<!-- wp:name -->...<!-- /wp:name -->`).
+ * Handles nested blocks, self-closing blocks, JSON attributes,
+ * and freeform (classic) content between blocks.
+ *
+ * Returns null on malformed input (mismatched openers/closers).
+ */
+
+/** Regex matching WordPress block comment tokens (open, close, self-closing). */
 const BLOCK_TOKEN =
   /<!--\s+(\/)?wp:([a-z][a-z0-9_-]*(?:\/[a-z][a-z0-9_-]*)?)\s+(\{[\s\S]*?\}\s+)?(\/)?-->/g;
 
+/** Quick check whether a string contains any WordPress block comments. */
 export function hasBlocks(s) {
   return /<!--\s+\/?wp:[a-z]/.test(String(s || ''));
 }
 
+/** Parse JSON attributes from a block comment, returning {} on failure. */
 function safeJson(s) {
   if (!s) return {};
   try {
@@ -15,6 +29,15 @@ function safeJson(s) {
   }
 }
 
+/**
+ * Parse raw post content into a flat array of block objects.
+ *
+ * Each block has: type ('block' or 'freeform'), name, attrs, raw
+ * markup, innerRaw, and children (for nested blocks).
+ *
+ * @param {string} src - Raw post content.
+ * @returns {Array|null} Parsed block array, or null if malformed.
+ */
 export function parseBlocks(src) {
   src = String(src || '');
   const out = [];

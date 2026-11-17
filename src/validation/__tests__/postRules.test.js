@@ -1,3 +1,5 @@
+/** @file Tests for post form validation rules. */
+
 import { describe, it, expect } from 'vitest';
 import { validatePost } from '../postRules';
 import { IMAGE_TYPES } from '../constants';

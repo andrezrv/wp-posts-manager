@@ -1,5 +1,18 @@
+/**
+ * @file Post form validation rules.
+ *
+ * Validates title, content, excerpt, and featured image before
+ * submission. Limits are read from env-configurable constants.
+ */
+
 import { LIMITS, IMAGE_TYPES, CONTROL_CHARS } from './constants';
 
+/**
+ * Validate post form values.
+ *
+ * @param {object} values - Form values (title, content, excerpt, imageFile).
+ * @returns {object} Error messages keyed by field name. Empty object if valid.
+ */
 export function validatePost(values) {
   const errors = {};
   const title = (values.title || '').trim();
