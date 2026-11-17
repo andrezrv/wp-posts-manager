@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validatePost } from '../postRules';
+import { IMAGE_TYPES } from '../constants';
 
 describe('validatePost', () => {
   const valid = { title: 'My Post', content: '<p>Hello world</p>' };
@@ -61,14 +62,14 @@ describe('validatePost', () => {
 
   it('rejects image over 5 MB', () => {
     const big = new File([new ArrayBuffer(5 * 1024 * 1024 + 1)], 'big.jpg', {
-      type: 'image/jpeg',
+      type: IMAGE_TYPES[0],
     });
     const result = validatePost({ ...valid, imageFile: big });
     expect(result.image).toMatch(/5 MB/);
   });
 
   it('accepts a valid image file', () => {
-    const file = new File(['pixel'], 'photo.png', { type: 'image/png' });
+    const file = new File(['pixel'], 'photo.png', { type: IMAGE_TYPES[0] });
     const result = validatePost({ ...valid, imageFile: file });
     expect(result.image).toBeUndefined();
   });

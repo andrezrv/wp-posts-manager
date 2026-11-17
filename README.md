@@ -15,7 +15,7 @@ A standalone React application for managing WordPress posts through the REST API
 - **Dark mode** — system-aware theme with a manual light/dark/system toggle
 - **Responsive** — works on desktop and mobile
 - **Demo mode** — built-in mock server for trying the app without a WordPress site
-- **Cross-tab sessions** — logging in or out syncs across all open tabs
+
 
 ## Prerequisites
 
