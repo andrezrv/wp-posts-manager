@@ -109,7 +109,6 @@ src/
 ├── components/       # Shared UI components (TopBar, Footer, Banner, etc.)
 ├── editor/           # Block parser, serializer, and bridge for WordPress blocks
 ├── hooks/            # Custom hooks (usePosts, usePostCounts, useDebounce)
-
 ├── pages/            # Route-level page components
 ├── styles/           # Global styles and CSS custom property tokens
 ├── utils/            # Formatting helpers (dates, HTML sanitization, etc.)
