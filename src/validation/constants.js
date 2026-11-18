@@ -42,4 +42,6 @@ const envStatus = import.meta.env.VITE_DEFAULT_POST_STATUS;
 export const DEFAULT_POST_STATUS =
   envStatus && envStatus !== 'trash' && STATUSES[envStatus] ? envStatus : 'draft';
 
+export const APP_NAME = import.meta.env.VITE_APP_NAME || 'Posts Manager';
+
 export const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;

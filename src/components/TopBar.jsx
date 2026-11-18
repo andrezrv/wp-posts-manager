@@ -15,6 +15,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { APP_NAME } from '../validation/constants';
 import styles from './TopBar.module.css';
 
 /** Read the saved theme preference from localStorage. */
@@ -113,7 +114,7 @@ export default function TopBar() {
         <a className={styles.brand} href={session ? '#/posts' : '#/login'}>
           <span className={styles.mark}>{ICON_MARK}</span>
           <span className={styles.brandName}>
-            Posts Manager
+            {APP_NAME}
             {session && (
               <span className={styles.brandSite}>{new URL(session.siteUrl).hostname}</span>
             )}

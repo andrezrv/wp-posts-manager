@@ -17,9 +17,12 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { APP_NAME } from './validation/constants';
 
 // Global styles: CSS custom properties, resets, and base typography.
 import './styles/global.css';
+
+document.title = APP_NAME;
 
 /**
  * Initialize and render the React application.

@@ -47,6 +47,7 @@ Edit `.env` to configure the app:
 | `VITE_POSTS_ORDER_BY` | `date` | Post list sort field (`date`, `modified`, `title`). |
 | `VITE_POSTS_ORDER` | `desc` | Post list sort direction (`asc`, `desc`). |
 | `VITE_EXCERPT_PREVIEW_LENGTH` | `160` | Maximum characters shown in the post list excerpt preview. |
+| `VITE_APP_NAME` | `Posts Manager` | Application name shown in the header and browser tab. |
 
 Set `VITE_WP_SITE_URL` to your site's URL to pre-fill the login form. All other variables are optional — the app works with sensible defaults when they are unset.
 
