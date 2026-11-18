@@ -18,9 +18,9 @@ const POSTS_ORDER_BY = import.meta.env.VITE_POSTS_ORDER_BY || 'date';
 /** Post list sort direction, configurable via env var. */
 const POSTS_ORDER = import.meta.env.VITE_POSTS_ORDER || 'desc';
 
-/** Verify credentials and fetch the current user's profile. */
-export function verifyLogin(auth) {
-  return apiFetch('GET', '/wp/v2/users/me', { query: { context: 'edit' }, auth });
+/** Verify the current token and fetch the authenticated user's profile. */
+export function verifyLogin() {
+  return apiFetch('GET', '/wp/v2/users/me', { query: { context: 'edit' } });
 }
 
 /** Fetch a paginated, filtered list of posts with embedded featured media. */
@@ -83,6 +83,71 @@ export async function getPostCounts() {
     counts[s] = Number(results[i].headers.get('X-WP-Total')) || 0;
   });
   return counts;
+}
+
+/**
+ * Exchange credentials for a JWT via the JWT Authentication plugin.
+ *
+ * Uses raw `fetch` because the API client is not configured yet at login time.
+ *
+ * @param {string} siteUrl - WordPress site base URL.
+ * @param {string} username - WordPress username.
+ * @param {string} password - Application Password.
+ * @returns {Promise<{ token: string, user_email: string, user_nicename: string, user_display_name: string }>}
+ */
+export async function obtainToken(siteUrl, username, password) {
+  const site = siteUrl.replace(/\/+$/, '');
+  let res;
+  try {
+    res = await fetch(site + '/wp-json/jwt-auth/v1/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+  } catch (_) {
+    throw new Error("We couldn't reach the site. Check your connection and the site address.");
+  }
+
+  let data;
+  try {
+    data = await res.json();
+  } catch (_) {
+    throw new Error('The server returned an unexpected response (HTTP ' + res.status + ').');
+  }
+
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error(
+        'JWT authentication is not available on this site. Install the JWT Authentication for WP REST API plugin.',
+      );
+    }
+    if (data.code === 'jwt_auth_failed') {
+      throw new Error(
+        "The username or Application Password is incorrect. Check both and try again. Your regular wp-admin password won't work here.",
+      );
+    }
+    throw new Error(data.message || 'Authentication failed (HTTP ' + res.status + '). Try again.');
+  }
+
+  if (!data.token) {
+    throw new Error('The server did not return an authentication token.');
+  }
+
+  return data;
+}
+
+/**
+ * Validate the current JWT with the WordPress server.
+ *
+ * @returns {Promise<boolean>} True if the token is still valid.
+ */
+export async function validateToken() {
+  try {
+    await apiFetch('POST', '/jwt-auth/v1/token/validate');
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 /** Upload an image file to the WordPress media library. */

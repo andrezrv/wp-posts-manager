@@ -4,7 +4,7 @@ A standalone React application for managing WordPress posts through the REST API
 
 ## Features
 
-- **Authentication** — log in with any WordPress user that has Application Passwords enabled (Author, Editor, or Administrator)
+- **Authentication** — log in with any WordPress user via JWT authentication (requires the JWT Authentication plugin)
 - **Post management** — create, edit, and delete posts with title, content, excerpt, status, publish date, and featured image
 - **Rich text editor** — TipTap-based WYSIWYG editor with bold, italic, headings, lists, blockquotes, links, and code blocks
 - **Block preservation** — WordPress Gutenberg block markup is preserved through editing round-trips (see [Editor architecture](#editor-architecture))
@@ -18,7 +18,9 @@ A standalone React application for managing WordPress posts through the REST API
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 18 or later
-- A WordPress site with [Application Passwords](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/) enabled (WordPress 5.6+)
+- A WordPress site (5.6+) with:
+  - [Application Passwords](https://make.wordpress.org/core/2020/11/05/application-passwords-integration-guide/) enabled
+  - [JWT Authentication for WP REST API](https://wordpress.org/plugins/jwt-authentication-for-wp-rest-api/) plugin installed and configured (see plugin docs for `JWT_AUTH_SECRET_KEY` setup)
 
 ## Setup
 

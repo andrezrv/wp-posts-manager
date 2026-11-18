@@ -12,7 +12,7 @@
 
 import { ApiError, friendlyMessage } from './errors';
 
-/** @type {string|null} Current Basic Auth header value. */
+/** @type {string|null} Current Authorization header value. */
 let sessionAuth = null;
 let siteUrl = '';
 let onSessionExpired = null;
@@ -22,7 +22,7 @@ let onSessionExpired = null;
  * individual settings — only provided fields are changed.
  *
  * @param {object} opts
- * @param {string} [opts.auth] - Basic Auth header value.
+ * @param {string} [opts.auth] - Authorization header value.
  * @param {string} [opts.site] - WordPress site base URL.
  * @param {Function} [opts.onExpired] - Callback when a 401 invalidates the session.
  */
@@ -91,9 +91,7 @@ export async function apiFetch(method, path, opts = {}) {
     if (res.status === 401 && sessionAuth && !auth) {
       err.sessionEnded = true;
       if (onSessionExpired) {
-        onSessionExpired(
-          'Your session ended because WordPress no longer accepts these credentials. The Application Password may have been revoked. Log in again to continue.',
-        );
+        onSessionExpired('Your session token is no longer valid. Log in again to continue.');
       }
     }
     throw err;

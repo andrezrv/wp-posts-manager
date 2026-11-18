@@ -1,7 +1,7 @@
 /** @file Tests for formatting and sanitization utility functions. */
 
 import { describe, it, expect } from 'vitest';
-import { esc, plainText, formatBytes, basicAuth, safeImgSrc } from '../format';
+import { esc, plainText, formatBytes, safeImgSrc } from '../format';
 
 describe('esc', () => {
   it('escapes HTML special characters', () => {
@@ -46,14 +46,6 @@ describe('formatBytes', () => {
 
   it('formats megabytes', () => {
     expect(formatBytes(5 * 1024 * 1024)).toBe('5.0 MB');
-  });
-});
-
-describe('basicAuth', () => {
-  it('generates a Basic auth header', () => {
-    const result = basicAuth('user', 'pass');
-    expect(result).toMatch(/^Basic /);
-    expect(atob(result.slice(6))).toBe('user:pass');
   });
 });
 

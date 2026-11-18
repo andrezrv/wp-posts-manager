@@ -51,6 +51,8 @@ const MESSAGE_MAP = {
   empty_content: 'WordPress needs at least a title, some content or an excerpt.',
   rest_upload_file_too_big: 'The image is larger than this site allows. Use a smaller file.',
   rest_upload_invalid_type: "WordPress doesn't accept this file type. Use JPG, PNG, GIF or WebP.",
+  jwt_auth_failed: BAD_CREDENTIALS,
+  jwt_auth_invalid_token: 'Your session has expired. Log in again to continue.',
   rest_no_route:
     "This site doesn't expose the WordPress REST API at /wp-json. Check the address or the site's permalink settings.",
 };

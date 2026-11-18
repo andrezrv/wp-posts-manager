@@ -9,20 +9,20 @@
  * - {@link AuthProvider} — context provider that wraps the app.
  * - {@link useAuth} — hook to access session state and auth actions.
  *
- * On login, credentials are verified against the WordPress REST API
- * (`/wp/v2/users/me`). The user must have `edit_posts` capability.
+ * On login, credentials are exchanged for a JWT via the WordPress
+ * JWT Authentication plugin, then `/wp/v2/users/me` is called with
+ * the Bearer token to verify the user has `edit_posts` capability.
  * Optionally fetches the site's posts-per-page setting from
  * `/wp/v2/settings` (skipped when `VITE_POSTS_PER_PAGE` is set).
  *
- * If the API returns 401 during a session (e.g. revoked Application
- * Password), the session is cleared and a notice is shown on the
+ * If the API returns 401 during a session (e.g. expired or revoked
+ * token), the session is cleared and a notice is shown on the
  * login page.
  */
 
 import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { configureClient } from '../api/client';
-import { verifyLogin, getSettings } from '../api/endpoints';
-import { basicAuth } from '../utils/format';
+import { obtainToken, validateToken, verifyLogin, getSettings } from '../api/endpoints';
 import { POSTS_PER_PAGE } from '../validation/constants';
 
 /** @constant {string} localStorage key for the serialized session. */
@@ -38,11 +38,17 @@ function saveSession(session) {
   }
 }
 
-/** Load session from localStorage. Returns null if absent or unparseable. */
+/** Load session from localStorage. Returns null if absent, unparseable, or non-Bearer. */
 function loadSession() {
   try {
     const raw = localStorage.getItem(SESSION_KEY);
-    return raw ? JSON.parse(raw) : null;
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    if (!session?.auth?.startsWith('Bearer ')) {
+      clearSession();
+      return null;
+    }
+    return session;
   } catch (_) {
     return null;
   }
@@ -85,11 +91,29 @@ export function AuthProvider({ children }) {
 
     if (session) {
       configureClient({ auth: session.auth, site: session.siteUrl });
+      (async () => {
+        const valid = await validateToken();
+        if (!valid) {
+          sessionRef.current = null;
+          setSession(null);
+          clearSession();
+          setLoginNotice('Your session has expired. Log in again to continue.');
+          configureClient({ auth: null, site: '' });
+        }
+      })();
     }
 
     const onStorage = (e) => {
       if (e.key !== SESSION_KEY) return;
-      const next = e.newValue ? JSON.parse(e.newValue) : null;
+      let next;
+      try {
+        next = e.newValue ? JSON.parse(e.newValue) : null;
+      } catch (_) {
+        next = null;
+      }
+      if (next && (!next.auth || !next.auth.startsWith('Bearer '))) {
+        next = null;
+      }
       sessionRef.current = next;
       setSession(next);
       if (next) {
@@ -103,12 +127,13 @@ export function AuthProvider({ children }) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- runs once on mount; session is read via ref
 
   const login = useCallback(async (siteUrl, username, password) => {
-    const auth = basicAuth(username, password);
     const site = siteUrl.replace(/\/+$/, '');
+    const tokenData = await obtainToken(site, username, password);
+    const auth = 'Bearer ' + tokenData.token;
 
     configureClient({ auth, site });
 
-    const res = await verifyLogin(auth);
+    const res = await verifyLogin();
     const user = res.data;
 
     if (!user.capabilities || !user.capabilities.edit_posts) {

@@ -2,7 +2,7 @@
  * @file Formatting and sanitization utility functions.
  *
  * Pure functions for HTML escaping, text extraction, date formatting,
- * byte formatting, Base64 auth encoding, and image URL sanitization.
+ * byte formatting, and image URL sanitization.
  * Used throughout the app for display and data preparation.
  */
 
@@ -45,11 +45,6 @@ export function formatBytes(b) {
   if (b < 1024) return b + ' B';
   if (b < 1048576) return (b / 1024).toFixed(0) + ' KB';
   return (b / 1048576).toFixed(1) + ' MB';
-}
-
-/** Encode username and password as a Basic Auth header value. */
-export function basicAuth(user, pass) {
-  return 'Basic ' + btoa(unescape(encodeURIComponent(user + ':' + pass)));
 }
 
 /** Sanitize an image URL — allows http(s), data:image, and blob: only. */
